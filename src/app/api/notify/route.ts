@@ -3,7 +3,6 @@ import { Resend } from 'resend'
 import type { BusRecord } from '@/types'
 import { STATUS_LABELS } from '@/types'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
 const FROM = process.env.EMAIL_FROM ?? 'FleetOps <onboarding@resend.dev>'
 
 function statusHtml(bus: BusRecord) {
@@ -43,6 +42,7 @@ function reportHtml(buses: BusRecord[]) {
 export async function POST(req: NextRequest) {
   const { to, type, bus, buses } = await req.json()
   if (!to) return NextResponse.json({ error:'Missing recipient' },{ status:400 })
+  const resend = new Resend(process.env.RESEND_API_KEY ?? 'no-key')
   try {
     if (type==='status'&&bus) {
       await resend.emails.send({ from:FROM, to:[to], subject:`FleetOps — Bus ${bus.bus_id}: ${STATUS_LABELS[bus.bus_status as keyof typeof STATUS_LABELS]}`, html:statusHtml(bus) })

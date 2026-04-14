@@ -46,7 +46,7 @@ const STAT_CONFIG = [
   { key:'total', label:'Total Buses',    sub:'Fleet size',        icon: IconBus,    accent:'#3b82f6', bg:'#eff6ff', iconBg:'#dbeafe' },
   { key:'IS',    label:'In Service',     sub:'Operational',       icon: IconCheck,  accent:'#16a34a', bg:'#f0fdf4', iconBg:'#dcfce7' },
   { key:'OOS',   label:'Out of Service', sub:'Need attention',    icon: IconAlert,  accent:'#dc2626', bg:'#fef2f2', iconBg:'#fee2e2' },
-  { key:'InPro', label:'Under Repair',   sub:'In maintenance',    icon: IconWrench, accent:'#ea580c', bg:'#fff7ed', iconBg:'#ffedd5' },
+  { key:'InPro', label:'Outfitting',      sub:'Commissioning',     icon: IconWrench, accent:'#ea580c', bg:'#fff7ed', iconBg:'#ffedd5' },
   { key:'WP',    label:'Pending',        sub:'Awaiting sign-off', icon: IconClock,  accent:'#7c3aed', bg:'#f5f3ff', iconBg:'#ede9fe' },
 ]
 
@@ -195,7 +195,7 @@ export default function DashboardClient({ counts, buses }: Props) {
             {[
               { key:'IS',    label:'In Service',     color:'#22c55e', bg:'#dcfce7', textColor:'#15803d' },
               { key:'OOS',   label:'Out of Service', color:'#ef4444', bg:'#fee2e2', textColor:'#b91c1c' },
-              { key:'InPro', label:'Under Repair',   color:'#f97316', bg:'#ffedd5', textColor:'#c2410c' },
+              { key:'InPro', label:'Outfitting & Commissioning', color:'#f97316', bg:'#ffedd5', textColor:'#c2410c' },
               { key:'WP',    label:'Pending',        color:'#3b82f6', bg:'#dbeafe', textColor:'#1d4ed8' },
             ].map(({ key, label, color, bg, textColor }) => {
               const val = counts[key as keyof typeof counts]

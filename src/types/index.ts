@@ -3,8 +3,8 @@ export type BusStatus = 'IS' | 'OOS' | 'InPro' | 'WP'
 export const STATUS_LABELS: Record<BusStatus, string> = {
   IS:    'In Service',
   OOS:   'Out of Service',
-  InPro: 'Under Repair',
-  WP:    'Pending Commissioning',
+  InPro: 'Outfitting and Commissioning',
+  WP:    'Pending',
 }
 
 export const STATUS_COLORS: Record<BusStatus, { bg: string; text: string; dot: string }> = {

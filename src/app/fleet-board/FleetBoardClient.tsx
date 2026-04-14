@@ -7,8 +7,8 @@ import Toast from '@/components/Toast'
 const STATUS_CONFIG = {
   IS:    { label:'In Service',            cellBg:'#16a34a', cellText:'#ffffff', legendBg:'#dcfce7', legendText:'#15803d' },
   OOS:   { label:'Out of Service',        cellBg:'#dc2626', cellText:'#ffffff', legendBg:'#fee2e2', legendText:'#b91c1c' },
-  InPro: { label:'Under Repair',          cellBg:'#ea580c', cellText:'#ffffff', legendBg:'#ffedd5', legendText:'#c2410c' },
-  WP:    { label:'Pending',               cellBg:'#cbd5e1', cellText:'#334155', legendBg:'#f1f5f9', legendText:'#475569' },
+  InPro: { label:'Outfitting & Commissioning', cellBg:'#ea580c', cellText:'#ffffff', legendBg:'#ffedd5', legendText:'#c2410c' },
+  WP:    { label:'Pending',                    cellBg:'#cbd5e1', cellText:'#334155', legendBg:'#f1f5f9', legendText:'#475569' },
 } as const
 
 export default function FleetBoardClient({ buses, userRole }: { buses: BusRecord[]; userRole: string }) {
@@ -186,7 +186,7 @@ export default function FleetBoardClient({ buses, userRole }: { buses: BusRecord
                   <span style={{ fontSize:11, fontWeight:500, opacity:0.7 }}>PENDING</span>
                 )}
                 {bus.bus_status === 'InPro' && (
-                  <span style={{ fontSize:11, fontWeight:500, opacity:0.8 }}>REPAIR</span>
+                  <span style={{ fontSize:10, fontWeight:500, opacity:0.8 }}>OUTFITTING</span>
                 )}
               </button>
             )

@@ -1,30 +1,34 @@
 'use client'
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import type { BusRecord, BusStatus } from '@/types'
-import { STATUS_LABELS } from '@/types'
+import type { BusRecord } from '@/types'
 import Toast from '@/components/Toast'
 
-const COLUMNS: { key: BusStatus; label: string; bg: string; text: string; border: string; dot: string; headerBg: string }[] = [
-  { key:'IS',    label:'In Service',            bg:'#f0fdf4', text:'#166534', border:'#bbf7d0', dot:'#22c55e', headerBg:'#dcfce7' },
-  { key:'OOS',   label:'Out of Service',        bg:'#fff5f5', text:'#991b1b', border:'#fecaca', dot:'#ef4444', headerBg:'#fee2e2' },
-  { key:'InPro', label:'Under Repair',          bg:'#fff8f0', text:'#9a3412', border:'#fed7aa', dot:'#f97316', headerBg:'#fff7ed' },
-  { key:'WP',    label:'Pending Commissioning', bg:'#eff6ff', text:'#1e40af', border:'#bfdbfe', dot:'#3b82f6', headerBg:'#dbeafe' },
-]
+const STATUS_CONFIG = {
+  IS:    { label:'In Service',            cellBg:'#16a34a', cellText:'#ffffff', legendBg:'#dcfce7', legendText:'#15803d' },
+  OOS:   { label:'Out of Service',        cellBg:'#dc2626', cellText:'#ffffff', legendBg:'#fee2e2', legendText:'#b91c1c' },
+  InPro: { label:'Under Repair',          cellBg:'#ea580c', cellText:'#ffffff', legendBg:'#ffedd5', legendText:'#c2410c' },
+  WP:    { label:'Pending',               cellBg:'#cbd5e1', cellText:'#334155', legendBg:'#f1f5f9', legendText:'#475569' },
+} as const
 
 export default function FleetBoardClient({ buses, userRole }: { buses: BusRecord[]; userRole: string }) {
-  const router = useRouter()
+  const router  = useRouter()
   const isAdmin = userRole === 'Admin'
-  const [search, setSearch]     = useState('')
-  const [toast, setToast]       = useState<string|null>(null)
-  const [exportMenu, setExportMenu] = useState<string|null>(null)
-  const [genPdf, setGenPdf]     = useState<string|null>(null)
+  const [search,    setSearch]    = useState('')
+  const [toast,     setToast]     = useState<string|null>(null)
+  const [exportMenu, setExportMenu] = useState(false)
+  const [genPdf,    setGenPdf]    = useState(false)
+  const [hovered,   setHovered]   = useState<string|null>(null)
+
+  const now = new Date()
+  const dateStr = now.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' }).toUpperCase()
+  const timeStr = now.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' })
 
   function showToast(msg: string) { setToast(msg); setTimeout(() => setToast(null), 3000) }
 
-  function exportCsv(colBuses: BusRecord[], label: string) {
+  function exportCsv(busList: BusRecord[], label: string) {
     const headers = ['Bus ID','Status','Bus System','Location','Age','OOS Date','BIS Date','Problem Description','Maintenance Comments']
-    const rows = colBuses.map(b => [
+    const rows = busList.map(b => [
       b.bus_id, b.bus_status, b.bus_system??'', b.location??'', b.bus_age??'',
       b.out_of_service_date??'', b.back_in_service_date??'',
       (b.problem_description??'').replace(/,/g,' '), (b.maintenance_comments??'').replace(/,/g,' ')
@@ -32,161 +36,197 @@ export default function FleetBoardClient({ buses, userRole }: { buses: BusRecord
     const csv = [headers, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n')
     const blob = new Blob([csv], { type:'text/csv' })
     const url  = URL.createObjectURL(blob)
-    const a    = document.createElement('a')
-    a.href = url; a.download = `FleetOps_${label.replace(/\s/g,'_')}_${new Date().toISOString().slice(0,10)}.csv`; a.click()
+    const a    = document.createElement('a'); a.href = url
+    a.download = `FleetOps_${label}_${now.toISOString().slice(0,10)}.csv`; a.click()
     URL.revokeObjectURL(url)
     showToast(`${label} CSV downloaded`)
-    setExportMenu(null)
+    setExportMenu(false)
   }
 
-  async function exportPdf(colBuses: BusRecord[], key: string, label: string) {
-    setGenPdf(key)
-    setExportMenu(null)
+  async function exportPdf(busList: BusRecord[], label: string) {
+    setGenPdf(true); setExportMenu(false)
     try {
-      const res = await fetch('/api/invoice', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ buses: colBuses }) })
+      const res  = await fetch('/api/invoice', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ buses: busList }) })
       if (!res.ok) throw new Error()
       const blob = await res.blob()
       const url  = URL.createObjectURL(blob)
-      const a    = document.createElement('a')
-      a.href = url; a.download = `FleetOps_${label.replace(/\s/g,'_')}_${new Date().toISOString().slice(0,10)}.pdf`; a.click()
+      const a    = document.createElement('a'); a.href = url
+      a.download = `FleetOps_${label}_${now.toISOString().slice(0,10)}.pdf`; a.click()
       URL.revokeObjectURL(url)
-      showToast(`${label} PDF downloaded`)
+      showToast(`PDF downloaded`)
     } catch { showToast('Error generating PDF') }
-    finally { setGenPdf(null) }
+    finally { setGenPdf(false) }
   }
 
   const filtered = useMemo(() => {
-    if (!search) return buses
     const q = search.toLowerCase()
-    return buses.filter(b =>
-      b.bus_id.toLowerCase().includes(q) ||
-      (b.bus_system ?? '').toLowerCase().includes(q) ||
-      (b.location ?? '').toLowerCase().includes(q)
-    )
+    return buses
+      .filter(b => !q || b.bus_id.toLowerCase().includes(q) || (b.bus_system??'').toLowerCase().includes(q) || (b.location??'').toLowerCase().includes(q))
+      .sort((a, b) => a.bus_id.localeCompare(b.bus_id, undefined, { numeric:true }))
   }, [buses, search])
 
-  const byStatus = useMemo(() => {
-    const map: Record<string, BusRecord[]> = { IS:[], OOS:[], InPro:[], WP:[] }
-    filtered.forEach(b => { if (map[b.bus_status]) map[b.bus_status].push(b) })
-    return map
-  }, [filtered])
+  const counts = useMemo(() => ({
+    IS:    buses.filter(b => b.bus_status === 'IS').length,
+    OOS:   buses.filter(b => b.bus_status === 'OOS').length,
+    InPro: buses.filter(b => b.bus_status === 'InPro').length,
+    WP:    buses.filter(b => b.bus_status === 'WP').length,
+  }), [buses])
+
+  const hoveredBus = hovered ? buses.find(b => b.id === hovered) : null
 
   return (
     <>
       {toast && <Toast message={toast}/>}
-      <div className="page-header">
+
+      {/* Header */}
+      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:16, flexWrap:'wrap', gap:10 }}>
         <div>
-          <h1 className="page-title">Fleet Board</h1>
-          <p className="page-subtitle">{buses.length} buses across {COLUMNS.length} status groups</p>
+          <h1 style={{ fontSize:20, fontWeight:600, margin:0, color:'#0f172a', letterSpacing:'-0.02em' }}>Fleet Board</h1>
+          <p style={{ fontSize:12, color:'#94a3b8', margin:'3px 0 0', fontWeight:400 }}>{buses.length} buses · {dateStr} · {timeStr}</p>
         </div>
-        <div style={{ display:'flex', gap:10, alignItems:'center' }}>
+        <div style={{ display:'flex', gap:8, alignItems:'center' }}>
+          {/* Search */}
           <div style={{ position:'relative' }}>
-            <svg style={{ position:'absolute', left:10, top:'50%', transform:'translateY(-50%)', color:'var(--text-muted)' }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input className="input" style={{ paddingLeft:32, width:200 }} placeholder="Search buses…" value={search} onChange={e => setSearch(e.target.value)}/>
+            <svg style={{ position:'absolute', left:9, top:'50%', transform:'translateY(-50%)', color:'#94a3b8' }} width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input
+              className="input" style={{ paddingLeft:30, width:180, fontSize:12, height:34 }}
+              placeholder="Search buses…" value={search} onChange={e => setSearch(e.target.value)}
+            />
+          </div>
+          {/* Export */}
+          <div style={{ position:'relative' }}>
+            <button
+              onClick={() => setExportMenu(!exportMenu)}
+              className="btn btn-secondary"
+              style={{ fontSize:12, padding:'6px 12px', height:34 }}
+            >
+              {genPdf ? 'Generating…' : (
+                <><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export</>
+              )}
+            </button>
+            {exportMenu && (
+              <div
+                style={{ position:'absolute', right:0, top:'calc(100% + 4px)', background:'#fff', border:'1px solid #e2e8f0', borderRadius:10, boxShadow:'0 8px 24px rgba(0,0,0,0.10)', zIndex:50, minWidth:160, overflow:'hidden' }}
+                onMouseLeave={() => setExportMenu(false)}
+              >
+                {(['All','IS','OOS','InPro','WP'] as const).map((key, i) => {
+                  const busList = key === 'All' ? filtered : filtered.filter(b => b.bus_status === key)
+                  const label   = key === 'All' ? 'All Buses' : STATUS_CONFIG[key].label
+                  return (
+                    <div key={key} style={{ borderTop: i > 0 ? '1px solid #f1f5f9' : 'none' }}>
+                      <div style={{ padding:'6px 14px 2px', fontSize:10, color:'#94a3b8', textTransform:'uppercase', letterSpacing:'0.06em', fontWeight:500 }}>{label}</div>
+                      <div style={{ display:'flex' }}>
+                        <button
+                          onClick={() => exportCsv(busList, label)}
+                          style={{ flex:1, padding:'6px 14px', background:'none', border:'none', cursor:'pointer', fontSize:12, color:'#334155', textAlign:'left', fontFamily:'inherit' }}
+                          onMouseEnter={e => (e.currentTarget.style.background='#f8fafc')}
+                          onMouseLeave={e => (e.currentTarget.style.background='none')}
+                        >CSV</button>
+                        <button
+                          onClick={() => exportPdf(busList, label)}
+                          style={{ flex:1, padding:'6px 14px', background:'none', border:'none', borderLeft:'1px solid #f1f5f9', cursor:'pointer', fontSize:12, color:'#334155', textAlign:'left', fontFamily:'inherit' }}
+                          onMouseEnter={e => (e.currentTarget.style.background='#f8fafc')}
+                          onMouseLeave={e => (e.currentTarget.style.background='none')}
+                        >PDF</button>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
           </div>
           {isAdmin && (
-            <button className="btn btn-primary" onClick={() => router.push('/buses/new')}>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <button className="btn btn-primary" style={{ fontSize:12, padding:'6px 12px', height:34 }} onClick={() => router.push('/buses/new')}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
               Add Bus
             </button>
           )}
         </div>
       </div>
 
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(4, 1fr)', gap:16, alignItems:'start' }}>
-        {COLUMNS.map(col => {
-          const colBuses = byStatus[col.key] ?? []
-          return (
-            <div key={col.key} style={{ borderRadius:14, border:`1.5px solid ${col.border}`, overflow:'hidden' }}>
-              {/* Column Header */}
-              <div style={{ background:col.headerBg, padding:'10px 12px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-                <div style={{ display:'flex', alignItems:'center', gap:6 }}>
-                  <span style={{ width:10, height:10, borderRadius:'50%', background:col.dot, display:'inline-block', flexShrink:0 }}/>
-                  <span style={{ fontFamily:'var(--font-display)', fontSize:12, fontWeight:700, color:col.text }}>{col.label}</span>
-                  <span style={{ background:col.bg, color:col.text, border:`1px solid ${col.border}`, borderRadius:9999, fontSize:11, fontWeight:700, padding:'1px 8px' }}>
-                    {colBuses.length}
-                  </span>
-                </div>
-                {/* Export dropdown */}
-                <div style={{ position:'relative' }}>
-                  <button
-                    onClick={() => setExportMenu(exportMenu === col.key ? null : col.key)}
-                    style={{ background:'rgba(255,255,255,0.6)', border:`1px solid ${col.border}`, borderRadius:6, padding:'3px 8px', cursor:'pointer', fontSize:11, color:col.text, fontFamily:'inherit', fontWeight:500, display:'flex', alignItems:'center', gap:4 }}
-                  >
-                    {genPdf === col.key ? '…' : (
-                      <><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export</>
-                    )}
-                  </button>
-                  {exportMenu === col.key && (
-                    <div style={{ position:'absolute', right:0, top:'calc(100% + 4px)', background:'var(--surface)', border:'1px solid var(--border-2)', borderRadius:10, boxShadow:'0 8px 24px rgba(0,0,0,0.12)', zIndex:50, minWidth:140, overflow:'hidden' }}
-                      onMouseLeave={() => setExportMenu(null)}>
-                      <button onClick={() => exportCsv(colBuses, col.label)}
-                        style={{ display:'flex', alignItems:'center', gap:8, width:'100%', padding:'10px 14px', background:'none', border:'none', cursor:'pointer', fontSize:13, fontFamily:'inherit', color:'var(--text-primary)', textAlign:'left' }}
-                        onMouseEnter={e => (e.currentTarget.style.background='var(--surface-2)')}
-                        onMouseLeave={e => (e.currentTarget.style.background='none')}>
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
-                        Export CSV
-                      </button>
-                      <button onClick={() => exportPdf(colBuses, col.key, col.label)}
-                        style={{ display:'flex', alignItems:'center', gap:8, width:'100%', padding:'10px 14px', background:'none', border:'none', borderTop:'1px solid var(--border)', cursor:'pointer', fontSize:13, fontFamily:'inherit', color:'var(--text-primary)', textAlign:'left' }}
-                        onMouseEnter={e => (e.currentTarget.style.background='var(--surface-2)')}
-                        onMouseLeave={e => (e.currentTarget.style.background='none')}>
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                        Export PDF
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Bus Cards */}
-              <div style={{ background:'var(--surface)', display:'flex', flexDirection:'column', gap:0, maxHeight:'calc(100vh - 220px)', overflowY:'auto' }}>
-                {colBuses.length === 0 ? (
-                  <div style={{ padding:'24px 16px', textAlign:'center', color:'var(--text-muted)', fontSize:13 }}>No buses</div>
-                ) : (
-                  colBuses.map((bus, i) => (
-                    <button
-                      key={bus.id}
-                      onClick={() => router.push(`/buses/${bus.id}`)}
-                      style={{
-                        display:'block', width:'100%', textAlign:'left',
-                        padding:'12px 16px', background:'transparent', border:'none',
-                        borderBottom: i < colBuses.length - 1 ? `1px solid ${col.border}` : 'none',
-                        cursor:'pointer', transition:'background 0.12s', fontFamily:'inherit',
-                      }}
-                      onMouseEnter={e => (e.currentTarget.style.background = col.headerBg)}
-                      onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-                    >
-                      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom: bus.bus_system || bus.location ? 4 : 0 }}>
-                        <span style={{ fontFamily:'var(--font-display)', fontWeight:700, fontSize:14, color:col.text }}>{bus.bus_id}</span>
-                        {isAdmin && (
-                          <span
-                            onClick={e => { e.stopPropagation(); router.push(`/buses/${bus.id}/edit`) }}
-                            style={{ fontSize:11, color:'var(--text-muted)', padding:'2px 8px', borderRadius:6, border:'1px solid var(--border-2)', background:'var(--surface)', cursor:'pointer' }}
-                          >
-                            Edit
-                          </span>
-                        )}
-                      </div>
-                      {(bus.bus_system || bus.location) && (
-                        <div style={{ fontSize:11, color:'var(--text-secondary)', display:'flex', gap:8, flexWrap:'wrap' }}>
-                          {bus.bus_system && <span>{bus.bus_system}</span>}
-                          {bus.bus_system && bus.location && <span style={{ color:'var(--text-muted)' }}>·</span>}
-                          {bus.location && <span>{bus.location}</span>}
-                        </div>
-                      )}
-                      {bus.problem_description && (
-                        <div style={{ fontSize:11, color:'var(--text-muted)', marginTop:3, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', maxWidth:'100%' }}>
-                          {bus.problem_description}
-                        </div>
-                      )}
-                    </button>
-                  ))
+      {/* Grid board */}
+      <div style={{ background:'#fff', border:'1px solid #e2e8f0', borderRadius:12, overflow:'hidden' }}>
+        {/* Grid */}
+        <div style={{ padding:'16px', display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(86px, 1fr))', gap:4 }}>
+          {filtered.length === 0 ? (
+            <div style={{ gridColumn:'1/-1', padding:'40px', textAlign:'center', color:'#94a3b8', fontSize:13 }}>No buses found</div>
+          ) : filtered.map(bus => {
+            const cfg = STATUS_CONFIG[bus.bus_status as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG.WP
+            const isHov = hovered === bus.id
+            return (
+              <button
+                key={bus.id}
+                onClick={() => router.push(`/buses/${bus.id}`)}
+                onMouseEnter={() => setHovered(bus.id)}
+                onMouseLeave={() => setHovered(null)}
+                style={{
+                  background: isHov ? (bus.bus_status === 'IS' ? '#15803d' : bus.bus_status === 'OOS' ? '#b91c1c' : bus.bus_status === 'InPro' ? '#c2410c' : '#94a3b8') : cfg.cellBg,
+                  color: cfg.cellText,
+                  border: 'none',
+                  borderRadius: 6,
+                  padding: '8px 6px',
+                  cursor: 'pointer',
+                  fontFamily: 'var(--font-body)',
+                  textAlign: 'center',
+                  transition: 'all 0.1s',
+                  minHeight: 48,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 2,
+                  transform: isHov ? 'scale(1.06)' : 'scale(1)',
+                  boxShadow: isHov ? '0 4px 12px rgba(0,0,0,0.18)' : 'none',
+                  zIndex: isHov ? 2 : 1,
+                  position: 'relative',
+                }}
+              >
+                <span style={{ fontSize:11, fontWeight:700, letterSpacing:'0.01em', lineHeight:1.2 }}>{bus.bus_id}</span>
+                {bus.bus_status === 'WP' && (
+                  <span style={{ fontSize:9, fontWeight:500, opacity:0.7 }}>PENDING</span>
                 )}
-              </div>
+                {bus.bus_status === 'InPro' && (
+                  <span style={{ fontSize:9, fontWeight:500, opacity:0.8 }}>REPAIR</span>
+                )}
+              </button>
+            )
+          })}
+        </div>
+
+        {/* Hover tooltip */}
+        {hoveredBus && (
+          <div style={{ margin:'0 16px', padding:'10px 14px', background:'#f8fafc', borderRadius:8, border:'1px solid #e2e8f0', fontSize:12, display:'flex', gap:20, flexWrap:'wrap', marginBottom:0 }}>
+            <span><strong style={{ color:'#0f172a', fontWeight:600 }}>{hoveredBus.bus_id}</strong></span>
+            <span style={{ color:'#64748b' }}>{STATUS_CONFIG[hoveredBus.bus_status as keyof typeof STATUS_CONFIG]?.label}</span>
+            {hoveredBus.bus_system && <span style={{ color:'#64748b' }}>{hoveredBus.bus_system}</span>}
+            {hoveredBus.location && <span style={{ color:'#64748b' }}>{hoveredBus.location}</span>}
+            {hoveredBus.problem_description && <span style={{ color:'#dc2626' }}>{hoveredBus.problem_description}</span>}
+            {isAdmin && (
+              <button
+                onClick={e => { e.stopPropagation(); router.push(`/buses/${hoveredBus.id}/edit`) }}
+                style={{ marginLeft:'auto', fontSize:11, color:'#1d6fce', background:'none', border:'1px solid #bfdbfe', borderRadius:5, padding:'2px 8px', cursor:'pointer', fontFamily:'inherit' }}
+              >Edit</button>
+            )}
+          </div>
+        )}
+
+        {/* Legend / summary bar */}
+        <div style={{ padding:'12px 16px', borderTop:'1px solid #f1f5f9', display:'flex', gap:6, alignItems:'center', flexWrap:'wrap' }}>
+          {(Object.keys(STATUS_CONFIG) as (keyof typeof STATUS_CONFIG)[]).map(key => (
+            <div
+              key={key}
+              onClick={() => router.push(`/buses?status=${key}`)}
+              style={{ display:'flex', alignItems:'center', gap:6, padding:'5px 12px', borderRadius:7, background:STATUS_CONFIG[key].legendBg, cursor:'pointer', border:`1px solid ${STATUS_CONFIG[key].legendBg}` }}
+            >
+              <span style={{ width:8, height:8, borderRadius:2, background:STATUS_CONFIG[key].cellBg, display:'inline-block', flexShrink:0 }}/>
+              <span style={{ fontSize:11, color:STATUS_CONFIG[key].legendText, fontWeight:400 }}>{STATUS_CONFIG[key].label}</span>
+              <span style={{ fontSize:12, fontWeight:700, color:STATUS_CONFIG[key].legendText }}>{counts[key]}</span>
             </div>
-          )
-        })}
+          ))}
+          <div style={{ marginLeft:'auto', fontSize:11, color:'#94a3b8', fontWeight:400 }}>
+            {filtered.length} of {buses.length} buses shown
+          </div>
+        </div>
       </div>
     </>
   )

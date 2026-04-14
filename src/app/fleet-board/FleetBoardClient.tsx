@@ -147,7 +147,7 @@ export default function FleetBoardClient({ buses, userRole }: { buses: BusRecord
       {/* Grid board */}
       <div style={{ background:'#fff', border:'1px solid #e2e8f0', borderRadius:12, overflow:'hidden' }}>
         {/* Grid */}
-        <div style={{ padding:'16px', display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(86px, 1fr))', gap:4 }}>
+        <div style={{ padding:'16px', display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(96px, 1fr))', gap:5 }}>
           {filtered.length === 0 ? (
             <div style={{ gridColumn:'1/-1', padding:'40px', textAlign:'center', color:'#94a3b8', fontSize:13 }}>No buses found</div>
           ) : filtered.map(bus => {
@@ -164,12 +164,12 @@ export default function FleetBoardClient({ buses, userRole }: { buses: BusRecord
                   color: cfg.cellText,
                   border: 'none',
                   borderRadius: 6,
-                  padding: '8px 6px',
+                  padding: '10px 8px',
                   cursor: 'pointer',
                   fontFamily: 'var(--font-body)',
                   textAlign: 'center',
                   transition: 'all 0.1s',
-                  minHeight: 48,
+                  minHeight: 56,
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
@@ -181,12 +181,12 @@ export default function FleetBoardClient({ buses, userRole }: { buses: BusRecord
                   position: 'relative',
                 }}
               >
-                <span style={{ fontSize:11, fontWeight:700, letterSpacing:'0.01em', lineHeight:1.2 }}>{bus.bus_id}</span>
+                <span style={{ fontSize:13, fontWeight:700, letterSpacing:'0.01em', lineHeight:1.2 }}>{bus.bus_id}</span>
                 {bus.bus_status === 'WP' && (
-                  <span style={{ fontSize:9, fontWeight:500, opacity:0.7 }}>PENDING</span>
+                  <span style={{ fontSize:11, fontWeight:500, opacity:0.7 }}>PENDING</span>
                 )}
                 {bus.bus_status === 'InPro' && (
-                  <span style={{ fontSize:9, fontWeight:500, opacity:0.8 }}>REPAIR</span>
+                  <span style={{ fontSize:11, fontWeight:500, opacity:0.8 }}>REPAIR</span>
                 )}
               </button>
             )

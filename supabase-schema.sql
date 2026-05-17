@@ -1,47 +1,177 @@
+-- ============================================================
+-- FleetOps SaaS Schema — Multi-Tenant with Manual Onboarding
+-- ============================================================
+
+-- Enable UUID extension
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- ============================================================
+-- ORGANIZATIONS (root tenant entity)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS organizations (
+  id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name          TEXT NOT NULL,
+  slug          TEXT UNIQUE NOT NULL,
+  owner_email   TEXT NOT NULL,
+  plan          TEXT DEFAULT 'basic',
+  status        TEXT DEFAULT 'active' CHECK (status IN ('active', 'suspended', 'trial')),
+  bus_limit     INTEGER DEFAULT NULL,
+  price_per_bus DECIMAL(10,2) DEFAULT NULL,
+  notes         TEXT DEFAULT NULL,
+  created_at    TIMESTAMPTZ DEFAULT NOW(),
+  updated_at    TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============================================================
+-- SUPER ADMINS (platform owners)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS super_admins (
+  id         UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id    UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  email      TEXT UNIQUE NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============================================================
+-- BUS RECORDS (scoped to organization)
+-- ============================================================
 CREATE TABLE IF NOT EXISTS bus_records (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  bus_id text NOT NULL UNIQUE,
-  bus_status text NOT NULL DEFAULT 'IS' CHECK (bus_status IN ('IS','OOS','InPro','WP')),
-  bus_system text, location text, bus_age text,
-  out_of_service_date date, back_in_service_date date,
-  estimated_repair_time text, problem_description text, maintenance_comments text,
-  created_at timestamptz NOT NULL DEFAULT now(),
-  updated_at timestamptz NOT NULL DEFAULT now()
+  id                    UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  org_id                UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  bus_id                TEXT NOT NULL,
+  bus_status            TEXT DEFAULT 'IS' CHECK (bus_status IN ('IS','OOS','InPro','WP')),
+  bus_system            TEXT,
+  location              TEXT,
+  bus_age               TEXT,
+  out_of_service_date   DATE,
+  back_in_service_date  DATE,
+  estimated_repair_time TEXT,
+  problem_description   TEXT,
+  maintenance_comments  TEXT,
+  created_at            TIMESTAMPTZ DEFAULT NOW(),
+  updated_at            TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(org_id, bus_id)
 );
 
-CREATE OR REPLACE FUNCTION update_updated_at() RETURNS TRIGGER LANGUAGE plpgsql AS $$ BEGIN NEW.updated_at = now(); RETURN NEW; END; $$;
-DROP TRIGGER IF EXISTS bus_records_updated_at ON bus_records;
-CREATE TRIGGER bus_records_updated_at BEFORE UPDATE ON bus_records FOR EACH ROW EXECUTE FUNCTION update_updated_at();
-
+-- ============================================================
+-- USER SUBSCRIPTIONS (org-level users)
+-- ============================================================
 CREATE TABLE IF NOT EXISTS user_subscriptions (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_email text NOT NULL UNIQUE,
-  subscription_type text NOT NULL DEFAULT 'Viewer' CHECK (subscription_type IN ('Admin','Viewer')),
-  is_active boolean NOT NULL DEFAULT true,
-  created_at timestamptz NOT NULL DEFAULT now()
+  id                UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  org_id            UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  user_email        TEXT NOT NULL,
+  subscription_type TEXT DEFAULT 'Viewer' CHECK (subscription_type IN ('Admin','Viewer')),
+  is_active         BOOLEAN DEFAULT TRUE,
+  created_at        TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(org_id, user_email)
 );
 
-ALTER TABLE bus_records ENABLE ROW LEVEL SECURITY;
+-- ============================================================
+-- AUTO-UPDATE TRIGGERS
+-- ============================================================
+CREATE OR REPLACE FUNCTION update_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_bus_records_updated_at ON bus_records;
+CREATE TRIGGER trg_bus_records_updated_at
+  BEFORE UPDATE ON bus_records
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+DROP TRIGGER IF EXISTS trg_organizations_updated_at ON organizations;
+CREATE TRIGGER trg_organizations_updated_at
+  BEFORE UPDATE ON organizations
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+-- ============================================================
+-- ROW LEVEL SECURITY
+-- ============================================================
+ALTER TABLE organizations      ENABLE ROW LEVEL SECURITY;
+ALTER TABLE bus_records        ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_subscriptions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE super_admins       ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "Authenticated users can read buses" ON bus_records;
-DROP POLICY IF EXISTS "Admins can write buses" ON bus_records;
-DROP POLICY IF EXISTS "Users can read own subscription" ON user_subscriptions;
-DROP POLICY IF EXISTS "Service role manages subscriptions" ON user_subscriptions;
+DROP POLICY IF EXISTS "service_orgs"        ON organizations;
+DROP POLICY IF EXISTS "user_view_own_org"   ON organizations;
+DROP POLICY IF EXISTS "service_buses"       ON bus_records;
+DROP POLICY IF EXISTS "user_view_org_buses" ON bus_records;
+DROP POLICY IF EXISTS "admin_manage_buses"  ON bus_records;
+DROP POLICY IF EXISTS "service_subs"        ON user_subscriptions;
+DROP POLICY IF EXISTS "user_view_own_sub"   ON user_subscriptions;
+DROP POLICY IF EXISTS "service_sa"          ON super_admins;
+DROP POLICY IF EXISTS "sa_view_own"         ON super_admins;
 
-CREATE POLICY "Authenticated users can read buses" ON bus_records FOR SELECT USING (auth.role() = 'authenticated');
-CREATE POLICY "Admins can write buses" ON bus_records FOR ALL USING (EXISTS (SELECT 1 FROM user_subscriptions WHERE user_email = auth.email() AND subscription_type = 'Admin' AND is_active = true));
-CREATE POLICY "Users can read own subscription" ON user_subscriptions FOR SELECT USING (user_email = auth.email());
-CREATE POLICY "Service role manages subscriptions" ON user_subscriptions FOR ALL USING (auth.role() = 'service_role');
+-- Organizations: service role full access; users see their own org
+CREATE POLICY "service_orgs" ON organizations
+  FOR ALL USING (auth.role() = 'service_role');
 
-INSERT INTO bus_records (bus_id, bus_status, bus_system, location, bus_age) VALUES
-  ('BUS-001','IS','Route A','Depot 1','3 years'),
-  ('BUS-002','OOS','Route B','Workshop','7 years'),
-  ('BUS-003','InPro','Route C','Bay 3','5 years'),
-  ('BUS-004','WP','Route D','Depot 2','1 year'),
-  ('BUS-005','IS','Route A','Depot 1','2 years')
-ON CONFLICT DO NOTHING;
+CREATE POLICY "user_view_own_org" ON organizations
+  FOR SELECT USING (
+    auth.role() = 'authenticated' AND
+    id IN (
+      SELECT org_id FROM user_subscriptions
+      WHERE user_email = auth.email() AND is_active = true
+    )
+  );
 
-INSERT INTO user_subscriptions (user_email, subscription_type, is_active)
-VALUES ('abesaveni@gmail.com', 'Admin', true)
-ON CONFLICT (user_email) DO UPDATE SET subscription_type = 'Admin', is_active = true;
+-- Bus records: service role full; org members read; org admins write
+CREATE POLICY "service_buses" ON bus_records
+  FOR ALL USING (auth.role() = 'service_role');
+
+CREATE POLICY "user_view_org_buses" ON bus_records
+  FOR SELECT USING (
+    auth.role() = 'authenticated' AND
+    org_id IN (
+      SELECT org_id FROM user_subscriptions
+      WHERE user_email = auth.email() AND is_active = true
+    )
+  );
+
+CREATE POLICY "admin_manage_buses" ON bus_records
+  FOR ALL USING (
+    auth.role() = 'authenticated' AND
+    org_id IN (
+      SELECT org_id FROM user_subscriptions
+      WHERE user_email = auth.email()
+        AND subscription_type = 'Admin'
+        AND is_active = true
+    )
+  );
+
+-- User subscriptions: service role full; users see their own row
+CREATE POLICY "service_subs" ON user_subscriptions
+  FOR ALL USING (auth.role() = 'service_role');
+
+CREATE POLICY "user_view_own_sub" ON user_subscriptions
+  FOR SELECT USING (user_email = auth.email());
+
+-- Super admins: service role full; SA sees their own row
+CREATE POLICY "service_sa" ON super_admins
+  FOR ALL USING (auth.role() = 'service_role');
+
+CREATE POLICY "sa_view_own" ON super_admins
+  FOR SELECT USING (email = auth.email());
+
+-- ============================================================
+-- INDEXES
+-- ============================================================
+CREATE INDEX IF NOT EXISTS idx_bus_records_org_id ON bus_records(org_id);
+CREATE INDEX IF NOT EXISTS idx_bus_records_status  ON bus_records(bus_status);
+CREATE INDEX IF NOT EXISTS idx_user_subs_email     ON user_subscriptions(user_email);
+CREATE INDEX IF NOT EXISTS idx_user_subs_org_id    ON user_subscriptions(org_id);
+CREATE INDEX IF NOT EXISTS idx_super_admins_email  ON super_admins(email);
+
+-- ============================================================
+-- SEED: Super Admin registration
+-- Run this after creating your Supabase auth user:
+--   1. Sign up at /login with your email
+--   2. Get your user UUID from Supabase Auth dashboard
+--   3. Uncomment and run the insert below
+-- ============================================================
+-- INSERT INTO super_admins (user_id, email)
+-- VALUES ('YOUR-SUPABASE-USER-UUID', 'abesaveni@gmail.com')
+-- ON CONFLICT (email) DO NOTHING;

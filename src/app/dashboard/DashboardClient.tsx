@@ -6,8 +6,9 @@ import type { BusRecord } from '@/types'
 import StatusBadge from '@/components/StatusBadge'
 
 interface Props {
-  counts: { total:number; IS:number; OOS:number; InPro:number; WP:number }
-  buses:  BusRecord[]
+  counts:   { total:number; IS:number; OOS:number; InPro:number; WP:number }
+  buses:    BusRecord[]
+  userRole: string
 }
 
 const IconBus = () => (
@@ -77,7 +78,8 @@ function DonutCenter({ viewBox, pct }: { viewBox?: { cx:number; cy:number }; pct
 const sectionTitle = { fontSize:13, fontWeight:600, color:'#0f172a', fontFamily:'var(--font-body)' } as const
 const mutedLabel   = { fontSize:11, color:'#94a3b8', fontWeight:400 } as const
 
-export default function DashboardClient({ counts, buses }: Props) {
+export default function DashboardClient({ counts, buses, userRole }: Props) {
+  const isAdmin = userRole === 'Admin'
   const router = useRouter()
   const healthPct = counts.total > 0 ? Math.round((counts.IS / counts.total) * 100) : 0
 
@@ -106,10 +108,12 @@ export default function DashboardClient({ counts, buses }: Props) {
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="12" rx="1"/><rect x="17" y="3" width="5" height="15" rx="1"/></svg>
             Fleet Board
           </button>
-          <button className="btn btn-primary" style={{ fontSize:12, padding:'6px 12px', fontWeight:500 }} onClick={() => router.push('/buses/new')}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Add Bus
-          </button>
+          {isAdmin && (
+            <button className="btn btn-primary" style={{ fontSize:12, padding:'6px 12px', fontWeight:500 }} onClick={() => router.push('/buses/new')}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add Bus
+            </button>
+          )}
         </div>
       </div>
 

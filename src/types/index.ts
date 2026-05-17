@@ -3,7 +3,7 @@ export type BusStatus = 'IS' | 'OOS' | 'InPro' | 'WP'
 export const STATUS_LABELS: Record<BusStatus, string> = {
   IS:    'In Service',
   OOS:   'Out of Service',
-  InPro: 'Outfitting and Commissioning',
+  InPro: 'Outfitting & Commissioning',
   WP:    'Pending',
 }
 
@@ -16,6 +16,7 @@ export const STATUS_COLORS: Record<BusStatus, { bg: string; text: string; dot: s
 
 export interface BusRecord {
   id:                    string
+  org_id:                string
   bus_id:                string
   bus_status:            BusStatus
   bus_system:            string | null
@@ -31,11 +32,37 @@ export interface BusRecord {
 }
 
 export type BusRecordInsert = Omit<BusRecord, 'id' | 'created_at' | 'updated_at'>
-export type UserRole = 'Admin' | 'Viewer' | 'None'
+
+export interface Organization {
+  id:            string
+  name:          string
+  slug:          string
+  owner_email:   string
+  plan:          string
+  status:        'active' | 'suspended' | 'trial'
+  bus_limit:     number | null
+  price_per_bus: number | null
+  notes:         string | null
+  created_at:    string
+  updated_at:    string
+}
 
 export interface UserSubscription {
   id:                string
+  org_id:            string
   user_email:        string
-  subscription_type: UserRole
+  subscription_type: 'Admin' | 'Viewer'
   is_active:         boolean
+  created_at:        string
 }
+
+export interface SuperAdmin {
+  id:         string
+  user_id:    string
+  email:      string
+  created_at: string
+}
+
+export type OrgRole = 'Admin' | 'Viewer'
+export type AppRole = 'SuperAdmin' | 'Admin' | 'Viewer' | 'None'
+export type OrgStatus = 'active' | 'suspended' | 'trial'

@@ -184,3 +184,26 @@ CREATE OR REPLACE VIEW trial_organizations AS
   FROM organizations
   WHERE status = 'trial'
   ORDER BY created_at DESC;
+
+-- ============================================================
+-- Braintree Payment Columns (run after self-onboarding migration)
+-- ============================================================
+
+-- Add Braintree customer + transaction tracking to organizations
+ALTER TABLE organizations
+  ADD COLUMN IF NOT EXISTS braintree_customer_id        TEXT DEFAULT NULL,
+  ADD COLUMN IF NOT EXISTS braintree_subscription_id    TEXT DEFAULT NULL,
+  ADD COLUMN IF NOT EXISTS braintree_last_transaction_id TEXT DEFAULT NULL;
+
+-- Allow 'payment_failed' as an additional org status
+ALTER TABLE organizations
+  DROP CONSTRAINT IF EXISTS organizations_status_check;
+
+ALTER TABLE organizations
+  ADD CONSTRAINT organizations_status_check
+    CHECK (status IN ('active', 'suspended', 'trial', 'payment_failed'));
+
+-- Index for webhook lookups by subscription ID
+CREATE INDEX IF NOT EXISTS idx_orgs_braintree_sub
+  ON organizations(braintree_subscription_id)
+  WHERE braintree_subscription_id IS NOT NULL;

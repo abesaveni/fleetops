@@ -14,10 +14,13 @@ CREATE TABLE IF NOT EXISTS organizations (
   slug          TEXT UNIQUE NOT NULL,
   owner_email   TEXT NOT NULL,
   plan          TEXT DEFAULT 'basic',
-  status        TEXT DEFAULT 'active' CHECK (status IN ('active', 'suspended', 'trial')),
+  status        TEXT DEFAULT 'active' CHECK (status IN ('active', 'suspended', 'trial', 'payment_failed')),
   bus_limit     INTEGER DEFAULT NULL,
   price_per_bus DECIMAL(10,2) DEFAULT NULL,
   notes         TEXT DEFAULT NULL,
+  braintree_customer_id         TEXT DEFAULT NULL,
+  braintree_subscription_id     TEXT DEFAULT NULL,
+  braintree_last_transaction_id TEXT DEFAULT NULL,
   created_at    TIMESTAMPTZ DEFAULT NOW(),
   updated_at    TIMESTAMPTZ DEFAULT NOW()
 );

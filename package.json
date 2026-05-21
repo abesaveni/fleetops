@@ -12,6 +12,8 @@
     "@react-pdf/renderer": "^3.4.5",
     "@supabase/auth-helpers-nextjs": "^0.10.0",
     "@supabase/supabase-js": "^2.103.0",
+    "braintree": "^3.37.0",
+    "braintree-web-drop-in": "^1.46.1",
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
     "lucide-react": "^0.400.0",
@@ -22,6 +24,8 @@
     "resend": "^3.5.0"
   },
   "devDependencies": {
+    "@types/braintree": "^3.4.4",
+    "@types/braintree-web-drop-in": "^1.39.4",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",

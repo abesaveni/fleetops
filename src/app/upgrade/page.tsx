@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import { useUser } from '@/context/UserContext'
+import PaymentModal from '@/components/PaymentModal'
 
 const PLANS = [
   {
@@ -89,33 +90,56 @@ const Check = () => (
   </svg>
 )
 
+interface ModalState {
+  planId:        'pro' | 'business'
+  planName:      string
+  price:         number
+  billingPeriod: 'monthly' | 'yearly'
+}
+
 export default function UpgradePage() {
   const router    = useRouter()
   const { user }  = useUser()
   const [yearly, setYearly] = useState(false)
-  const [loading, setLoading] = useState<string | null>(null)
+  const [modal,  setModal]  = useState<ModalState | null>(null)
 
   const currentPlan = user?.plan ?? 'trial'
   const busCount    = user?.bus_count ?? 0
   const busLimit    = user?.bus_limit ?? 5
   const atLimit     = busLimit !== null && busCount >= busLimit
 
-  async function handleUpgrade(planId: string) {
+  function handleUpgrade(planId: string, planName: string, monthly: number, annualTotal: number) {
     if (planId === 'starter') return
     if (planId === 'enterprise') {
       window.location.href = 'mailto:sales@fleetops.io?subject=Enterprise Plan Inquiry'
       return
     }
-    setLoading(planId)
-    // In production this would redirect to Stripe. For now we show a contact prompt.
-    await new Promise(r => setTimeout(r, 800))
-    alert(`To upgrade to the ${planId.charAt(0).toUpperCase() + planId.slice(1)} plan, please contact us at sales@fleetops.io or call (800) 555-0199.\n\nWe'll have you up and running within one business day.`)
-    setLoading(null)
+    setModal({
+      planId:        planId as 'pro' | 'business',
+      planName,
+      price:         yearly ? annualTotal : monthly,
+      billingPeriod: yearly ? 'yearly' : 'monthly',
+    })
+  }
+
+  function handleSuccess() {
+    setModal(null)
+    router.push('/dashboard')
   }
 
   return (
     <div className="layout">
       <Sidebar/>
+      {modal && (
+        <PaymentModal
+          planId={modal.planId}
+          planName={modal.planName}
+          price={modal.price}
+          billingPeriod={modal.billingPeriod}
+          onClose={() => setModal(null)}
+          onSuccess={handleSuccess}
+        />
+      )}
       <main className="main-content" style={{ background: '#f8fafc' }}>
 
         {/* Limit reached banner */}
@@ -172,8 +196,6 @@ export default function UpgradePage() {
             const isCurrent  = currentPlan === plan.id || (currentPlan === 'trial' && plan.id === 'starter')
             const isPopular  = plan.tag === 'Most Popular'
             const price      = yearly ? plan.yearly : plan.monthly
-            const isLoading  = loading === plan.id
-
             return (
               <div key={plan.id} style={{
                 background: isPopular ? '#0f172a' : '#fff',
@@ -246,8 +268,8 @@ export default function UpgradePage() {
 
                 {/* CTA */}
                 <button
-                  onClick={() => handleUpgrade(plan.id)}
-                  disabled={isCurrent || isLoading}
+                  onClick={() => handleUpgrade(plan.id, plan.name, plan.monthly ?? 0, plan.yearly ?? 0)}
+                  disabled={isCurrent}
                   style={{
                     width: '100%', padding: '11px', border: 'none', borderRadius: 8,
                     fontSize: 13, fontWeight: 700, cursor: isCurrent ? 'default' : 'pointer',
@@ -262,7 +284,7 @@ export default function UpgradePage() {
                       : isPopular || plan.ctaStyle === 'primary' ? '#fff' : '#0f172a',
                     opacity: isCurrent ? 0.7 : 1,
                   }}>
-                  {isLoading ? 'Processing…' : isCurrent ? 'Current Plan' : plan.cta}
+                  {isCurrent ? 'Current Plan' : plan.cta}
                 </button>
               </div>
             )

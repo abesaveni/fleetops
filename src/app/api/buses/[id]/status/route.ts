@@ -13,11 +13,12 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   const role  = typeof meta.role   === 'string' ? meta.role   : null
   const orgId = typeof meta.org_id === 'string' ? meta.org_id : null
 
+  const admin = createAdminClient()
+
   let sub: { org_id: string; is_active: boolean } | null = null
   if (role && orgId) {
     sub = { org_id: orgId, is_active: meta.is_active !== false }
   } else {
-    const admin = createAdminClient()
     const { data } = await admin
       .from('user_subscriptions')
       .select('org_id, is_active')

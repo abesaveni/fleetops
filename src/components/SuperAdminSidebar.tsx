@@ -76,6 +76,12 @@ export default function SuperAdminSidebar() {
             <polyline points="9 22 9 12 15 12 15 22"/>
           </svg>
         }/>
+        <NavLink href="/super-admin/billing" label="Billing" icon={
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+            <rect x="1" y="4" width="22" height="16" rx="2"/>
+            <line x1="1" y1="10" x2="23" y2="10"/>
+          </svg>
+        }/>
       </nav>
 
       <div className="sidebar-footer">

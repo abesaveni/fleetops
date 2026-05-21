@@ -84,10 +84,12 @@ export async function POST(req: NextRequest) {
 
   // Update org plan + bus limit
   const updates: Record<string, unknown> = {
-    plan:       planId,
-    status:     'active',
-    bus_limit:  plan.bus_limit,
-    braintree_customer_id: customerId,
+    plan:            planId,
+    status:          'active',
+    bus_limit:       plan.bus_limit,
+    plan_period:     billingPeriod,
+    plan_started_at: new Date().toISOString(),
+    braintree_customer_id:         customerId,
     braintree_last_transaction_id: saleResult.transaction.id,
     updated_at: new Date().toISOString(),
   }

@@ -207,3 +207,13 @@ ALTER TABLE organizations
 CREATE INDEX IF NOT EXISTS idx_orgs_braintree_sub
   ON organizations(braintree_subscription_id)
   WHERE braintree_subscription_id IS NOT NULL;
+
+-- ============================================================
+-- Billing Period & Plan Tracking (run after Braintree migration)
+-- ============================================================
+
+-- Track billing period (monthly/yearly) and when the plan started
+ALTER TABLE organizations
+  ADD COLUMN IF NOT EXISTS plan_period     TEXT DEFAULT NULL
+    CHECK (plan_period IN ('monthly', 'yearly')),
+  ADD COLUMN IF NOT EXISTS plan_started_at TIMESTAMPTZ DEFAULT NULL;

@@ -39,10 +39,16 @@ export interface Organization {
   slug:          string
   owner_email:   string
   plan:          string
-  status:        'active' | 'suspended' | 'trial'
+  status:        'active' | 'suspended' | 'trial' | 'payment_failed'
   bus_limit:     number | null
   price_per_bus: number | null
   notes:         string | null
+  // Braintree billing fields
+  braintree_customer_id:          string | null
+  braintree_subscription_id:      string | null
+  braintree_last_transaction_id:  string | null
+  plan_period:     'monthly' | 'yearly' | null
+  plan_started_at: string | null
   created_at:    string
   updated_at:    string
 }

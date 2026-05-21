@@ -1,9 +1,9 @@
 import { redirect } from 'next/navigation'
 import { createServerComponentClient } from '@/lib/supabase-server'
-import { getOrgsWithBilling } from '@/lib/organizations'
-import OrgsClient from './OrgsClient'
+import { getOrgsWithBilling, getSuperAdminStats } from '@/lib/organizations'
+import BillingClient from './BillingClient'
 
-export default async function OrganizationsPage() {
+export default async function BillingPage() {
   const supabase = createServerComponentClient()
   const { data: { session } } = await supabase.auth.getSession()
   if (!session) redirect('/login')
@@ -15,6 +15,10 @@ export default async function OrganizationsPage() {
     .maybeSingle()
   if (!sa) redirect('/dashboard')
 
-  const orgs = await getOrgsWithBilling()
-  return <OrgsClient orgs={orgs}/>
+  const [orgs, stats] = await Promise.all([
+    getOrgsWithBilling(),
+    getSuperAdminStats(),
+  ])
+
+  return <BillingClient orgs={orgs} stats={stats}/>
 }

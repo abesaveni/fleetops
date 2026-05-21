@@ -21,6 +21,8 @@ CREATE TABLE IF NOT EXISTS organizations (
   braintree_customer_id         TEXT DEFAULT NULL,
   braintree_subscription_id     TEXT DEFAULT NULL,
   braintree_last_transaction_id TEXT DEFAULT NULL,
+  plan_period     TEXT DEFAULT NULL CHECK (plan_period IN ('monthly', 'yearly')),
+  plan_started_at TIMESTAMPTZ DEFAULT NULL,
   created_at    TIMESTAMPTZ DEFAULT NOW(),
   updated_at    TIMESTAMPTZ DEFAULT NOW()
 );

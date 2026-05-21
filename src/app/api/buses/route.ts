@@ -6,16 +6,17 @@ export async function POST(req: NextRequest) {
   const { data: { session } } = await supabase.auth.getSession()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  // Read from JWT first — falls back to DB only for legacy users
+  // Prefer JWT app_metadata — falls back to DB for legacy users
   const meta  = (session.user.app_metadata ?? {}) as Record<string, unknown>
   const role  = typeof meta.role   === 'string' ? meta.role   : null
   const orgId = typeof meta.org_id === 'string' ? meta.org_id : null
 
+  const admin = createAdminClient()
   let sub: { subscription_type: string; org_id: string; is_active: boolean } | null = null
+
   if (role && orgId) {
     sub = { subscription_type: role, org_id: orgId, is_active: meta.is_active !== false }
   } else {
-    const admin = createAdminClient()
     const { data } = await admin
       .from('user_subscriptions')
       .select('subscription_type, org_id, is_active')
@@ -27,6 +28,25 @@ export async function POST(req: NextRequest) {
   if (!sub || !sub.is_active || sub.subscription_type !== 'Admin') {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
+
+  // ── Enforce bus limit ─────────────────────────────────────────────────────
+  const [countRes, orgRes] = await Promise.all([
+    admin.from('bus_records').select('id', { count: 'exact', head: true }).eq('org_id', sub.org_id),
+    admin.from('organizations').select('bus_limit, plan, name').eq('id', sub.org_id).single(),
+  ])
+  const currentCount = countRes.count ?? 0
+  const busLimit     = orgRes.data?.bus_limit ?? null   // null = unlimited
+
+  if (busLimit !== null && currentCount >= busLimit) {
+    return NextResponse.json({
+      error: `You've reached your free limit of ${busLimit} buses. Upgrade your plan to add more.`,
+      code:  'LIMIT_REACHED',
+      limit: busLimit,
+      count: currentCount,
+      plan:  orgRes.data?.plan ?? 'trial',
+    }, { status: 402 })
+  }
+  // ─────────────────────────────────────────────────────────────────────────
 
   const body = await req.json()
   const { data, error } = await admin.from('bus_records').insert([{

@@ -80,6 +80,10 @@ export default function BusForm({ bus, mode }: { bus?: BusRecord; mode: 'new' | 
     const res    = await fetch(url, { method, headers: { 'Content-Type':'application/json' }, body: JSON.stringify(form) })
     if (!res.ok) {
       const d = await res.json().catch(() => ({}))
+      if (d.code === 'LIMIT_REACHED') {
+        router.push('/upgrade')
+        return
+      }
       setError(d.error ?? 'Error saving')
       setSaving(false)
       return

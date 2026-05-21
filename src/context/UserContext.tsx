@@ -2,10 +2,13 @@
 import { createContext, useContext, useEffect, useState, useCallback } from 'react'
 
 export interface UserInfo {
-  email:    string
-  role:     string        // 'Admin' | 'Viewer' | 'super_admin'
-  org_id:   string | null
-  org_name: string | null
+  email:     string
+  role:      string         // 'Admin' | 'Viewer' | 'super_admin'
+  org_id:    string | null
+  org_name:  string | null
+  plan:      string | null  // 'trial' | 'pro' | 'business' | 'enterprise'
+  bus_limit: number | null  // null = unlimited
+  bus_count: number | null
 }
 
 interface UserContextValue {

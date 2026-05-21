@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
 import type { BusRecord } from '@/types'
 import StatusBadge from '@/components/StatusBadge'
+import BusLimitBanner from '@/components/BusLimitBanner'
 
 interface Props {
   counts:   { total:number; IS:number; OOS:number; InPro:number; WP:number }
@@ -93,6 +94,8 @@ export default function DashboardClient({ counts, buses, userRole }: Props) {
 
   return (
     <div style={{ display:'flex', flexDirection:'column', gap:20 }}>
+
+      <BusLimitBanner/>
 
       {/* Header */}
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:10 }}>

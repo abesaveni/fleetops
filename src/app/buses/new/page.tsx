@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { createServerComponentClient } from '@/lib/supabase-server'
+import { createServerComponentClient, createAdminClient } from '@/lib/supabase-server'
 import { getSubFromSession } from '@/lib/buses'
 import Sidebar from '@/components/Sidebar'
 import BusForm from '@/components/BusForm'
@@ -11,6 +11,16 @@ export default async function NewBusPage() {
 
   const sub = await getSubFromSession(session.user as any)
   if (!sub || !sub.is_active || sub.subscription_type !== 'Admin') redirect('/buses')
+
+  // Check bus limit server-side — redirect before showing the form
+  const admin = createAdminClient()
+  const [countRes, orgRes] = await Promise.all([
+    admin.from('bus_records').select('id', { count: 'exact', head: true }).eq('org_id', sub.org_id),
+    admin.from('organizations').select('bus_limit').eq('id', sub.org_id).single(),
+  ])
+  const busLimit = orgRes.data?.bus_limit ?? null
+  const busCount = countRes.count ?? 0
+  if (busLimit !== null && busCount >= busLimit) redirect('/upgrade')
 
   return (
     <div className="layout">

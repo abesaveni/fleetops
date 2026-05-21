@@ -4,6 +4,28 @@ import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-client'
 import { useUser } from '@/context/UserContext'
 
+function BusUsageBar({ count, limit }: { count: number; limit: number }) {
+  const pct      = Math.min((count / limit) * 100, 100)
+  const atLimit  = count >= limit
+  const barColor = atLimit ? '#ef4444' : pct >= 80 ? '#f59e0b' : '#3b82f6'
+  return (
+    <div style={{ padding: '10px 14px 0' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
+        <span style={{ fontSize: 10, color: 'rgba(148,163,184,0.7)', fontWeight: 500, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Fleet Capacity</span>
+        <span style={{ fontSize: 10, fontWeight: 700, color: atLimit ? '#f87171' : 'rgba(148,163,184,0.8)' }}>{count}/{limit}</span>
+      </div>
+      <div style={{ height: 3, background: 'rgba(255,255,255,0.08)', borderRadius: 9999, overflow: 'hidden' }}>
+        <div style={{ height: '100%', width: `${pct}%`, background: barColor, borderRadius: 9999, transition: 'width 0.4s ease' }}/>
+      </div>
+      {atLimit && (
+        <Link href="/upgrade" style={{ display: 'block', marginTop: 8, fontSize: 11, fontWeight: 700, color: '#f59e0b', textDecoration: 'none', textAlign: 'center', background: 'rgba(245,158,11,0.1)', borderRadius: 6, padding: '5px 0', border: '1px solid rgba(245,158,11,0.2)' }}>
+          ⚡ Upgrade to add more buses
+        </Link>
+      )}
+    </div>
+  )
+}
+
 const BusIcon = () => (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round">
     <rect x="1" y="7" width="22" height="13" rx="2"/><circle cx="6" cy="20" r="2"/><circle cx="18" cy="20" r="2"/>
@@ -110,6 +132,12 @@ export default function Sidebar() {
       </nav>
 
       <div className="sidebar-footer">
+        {/* Show bus capacity bar for orgs with a limit */}
+        {user?.bus_limit !== null && user?.bus_limit !== undefined && user.bus_count !== null && (
+          <div style={{ marginBottom: 10 }}>
+            <BusUsageBar count={user.bus_count ?? 0} limit={user.bus_limit}/>
+          </div>
+        )}
         <div className="sidebar-user-info">
           {email && <span className="sidebar-user-email" title={email}>{email}</span>}
           {role  && <span className={`role-badge role-badge-${role.toLowerCase()}`}>{role}</span>}

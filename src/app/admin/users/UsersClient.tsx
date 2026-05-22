@@ -39,16 +39,26 @@ export default function UsersClient({ currentUserEmail }: { currentUserEmail: st
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault()
     setSaving(true)
-    const res = await fetch('/api/admin/users', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
-    })
-    const data = await res.json()
-    if (!res.ok) { showToast(data.error ?? 'Error creating user'); setSaving(false); return }
-    setCreated({ email: form.email, password: form.password })
-    loadUsers()
-    setSaving(false)
+    try {
+      const res = await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      })
+      let data: any = {}
+      try { data = await res.json() } catch { /* non-JSON response */ }
+      if (!res.ok) {
+        showToast(data.error ?? `Server error (${res.status})`)
+        setSaving(false)
+        return
+      }
+      setCreated({ email: form.email, password: form.password })
+      loadUsers()
+    } catch (err: any) {
+      showToast(err?.message ?? 'Network error — please try again')
+    } finally {
+      setSaving(false)
+    }
   }
 
   async function toggleActive(user: UserSub) {

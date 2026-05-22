@@ -1,22 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerComponentClient, createAdminClient } from '@/lib/supabase-server'
 
-// Shared: get the calling user's subscription from JWT app_metadata or DB fallback
-async function getCallerSub(session: { user: { email: string; app_metadata?: Record<string, unknown> } }) {
-  const meta  = (session.user.app_metadata ?? {}) as Record<string, unknown>
-  const role  = typeof meta.role === 'string' ? meta.role : null
+// Get the calling user's subscription from JWT app_metadata or DB fallback.
+// Called with session.user — accesses app_metadata directly on the user object.
+async function getCallerSub(user: { email: string; app_metadata?: Record<string, unknown> }) {
+  const meta  = (user.app_metadata ?? {}) as Record<string, unknown>
+  const role  = typeof meta.role   === 'string' ? meta.role   : null
   const orgId = typeof meta.org_id === 'string' ? meta.org_id : null
 
   if (role && orgId) {
     return { subscription_type: role, org_id: orgId, is_active: meta.is_active !== false }
   }
 
-  // Legacy fallback: read from DB
+  // Legacy fallback: read from DB for users without app_metadata stamp
   const admin = createAdminClient()
   const { data } = await admin
     .from('user_subscriptions')
     .select('subscription_type, org_id, is_active')
-    .eq('user_email', session.user.email)
+    .eq('user_email', user.email)
     .maybeSingle()
   return data
 }

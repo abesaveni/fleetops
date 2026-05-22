@@ -24,7 +24,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const sub = await getCallerSub(session.user as any)
-  if (!sub || !sub.is_active || sub.subscription_type !== 'Admin') {
+  if (!sub || !sub.is_active) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
@@ -58,7 +58,7 @@ export async function DELETE(_req: NextRequest, { params }: { params: { id: stri
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const sub = await getCallerSub(session.user as any)
-  if (!sub || !sub.is_active || sub.subscription_type !== 'Admin') {
+  if (!sub || !sub.is_active) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 

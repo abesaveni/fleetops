@@ -102,6 +102,11 @@ export default function Sidebar() {
         <NavLink href="/buses?status=OOS"   label="Out of Service" sub icon={<span className="dot dot-OOS"/>}/>
         <NavLink href="/buses?status=InPro" label="Outfitting"     sub icon={<span className="dot dot-InPro"/>}/>
         <NavLink href="/buses?status=WP"    label="Pending"        sub icon={<span className="dot dot-WP"/>}/>
+        <NavLink href="/buses/new" label="Add Bus" icon={
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
+          </svg>
+        }/>
 
         <div className="nav-section-label" style={{ marginTop: 4 }}>Reports</div>
         <NavLink href="/admin/invoice" label="Fleet Report" icon={
@@ -115,11 +120,6 @@ export default function Sidebar() {
         {isAdmin && (
           <>
             <div className="nav-section-label" style={{ marginTop: 4 }}>Admin</div>
-            <NavLink href="/buses/new" label="Add Bus" icon={
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
-              </svg>
-            }/>
             <NavLink href="/admin/users" label="Manage Users" icon={
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>

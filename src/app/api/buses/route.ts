@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     sub = data
   }
 
-  if (!sub || !sub.is_active || sub.subscription_type !== 'Admin') {
+  if (!sub || !sub.is_active) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 

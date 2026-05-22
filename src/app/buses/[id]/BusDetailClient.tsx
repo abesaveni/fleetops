@@ -121,37 +121,19 @@ export default function BusDetailClient({ bus: initialBus, userRole }: { bus: Bu
           </div>
           <div style={{ display: 'flex', gap: 10 }}>
             <button className="btn btn-secondary" onClick={handleNotify}>✉ Notify</button>
-            {/* Viewers can update status; Admins get full edit/delete */}
-            {!isAdmin && (
-              <button
-                className="btn btn-primary"
-                onClick={() => setShowStatusModal(true)}
-                disabled={updatingStatus}
-                style={{ display: 'flex', alignItems: 'center', gap: 6 }}
-              >
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                  <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
-                </svg>
-                {updatingStatus ? 'Updating…' : 'Update Status'}
-              </button>
-            )}
-            {isAdmin && (
-              <>
-                <button
-                  className="btn btn-secondary"
-                  onClick={() => setShowStatusModal(true)}
-                  disabled={updatingStatus}
-                  style={{ display: 'flex', alignItems: 'center', gap: 6 }}
-                >
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                    <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
-                  </svg>
-                  {updatingStatus ? 'Updating…' : 'Update Status'}
-                </button>
-                <button className="btn btn-primary" onClick={() => router.push(`/buses/${bus.id}/edit`)}>Edit</button>
-                <button className="btn btn-danger" onClick={handleDelete} disabled={deleting}>{deleting ? 'Deleting…' : 'Delete'}</button>
-              </>
-            )}
+            <button
+              className="btn btn-secondary"
+              onClick={() => setShowStatusModal(true)}
+              disabled={updatingStatus}
+              style={{ display: 'flex', alignItems: 'center', gap: 6 }}
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+              </svg>
+              {updatingStatus ? 'Updating…' : 'Update Status'}
+            </button>
+            <button className="btn btn-primary" onClick={() => router.push(`/buses/${bus.id}/edit`)}>Edit</button>
+            <button className="btn btn-danger" onClick={handleDelete} disabled={deleting}>{deleting ? 'Deleting…' : 'Delete'}</button>
           </div>
         </div>
       </div>

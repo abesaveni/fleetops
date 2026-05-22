@@ -10,7 +10,7 @@ export default async function NewBusPage() {
   if (!session) redirect('/login')
 
   const sub = await getSubFromSession(session.user as any)
-  if (!sub || !sub.is_active || sub.subscription_type !== 'Admin') redirect('/buses')
+  if (!sub || !sub.is_active) redirect('/buses')
 
   // Check bus limit server-side — redirect before showing the form
   const admin = createAdminClient()

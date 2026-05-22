@@ -90,7 +90,7 @@ export default function BusListClient({ buses, initialStatus, initialSearch, use
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
             {sendingEmail?'Sending…':'Email Report'}
           </button>
-          {isAdmin&&<button className="btn btn-primary" onClick={()=>router.push('/buses/new')}>+ Add Bus</button>}
+          <button className="btn btn-primary" onClick={()=>router.push('/buses/new')}>+ Add Bus</button>
         </div>
       </div>
 
@@ -122,7 +122,7 @@ export default function BusListClient({ buses, initialStatus, initialSearch, use
                   <td style={{ color:'var(--text-secondary)' }}>{bus.bus_age??'—'}</td>
                   <td style={{ color:'var(--text-secondary)' }}>{bus.out_of_service_date ? new Date(bus.out_of_service_date).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '—'}</td>
                   <td onClick={e=>e.stopPropagation()}>
-                    {isAdmin&&<button className="btn btn-secondary" style={{ padding:'4px 10px', fontSize:12 }} onClick={()=>router.push(`/buses/${bus.id}/edit`)}>Edit</button>}
+                    <button className="btn btn-secondary" style={{ padding:'4px 10px', fontSize:12 }} onClick={()=>router.push(`/buses/${bus.id}/edit`)}>Edit</button>
                   </td>
                 </tr>
               ))}

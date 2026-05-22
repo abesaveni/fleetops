@@ -72,7 +72,7 @@ export default function SignupPage() {
       const data = await res.json()
       if (!res.ok) { setError(data.error || 'Something went wrong. Please try again.'); setLoading(false); return }
 
-      // Sign in automatically
+      // Sign in automatically with the new org admin credentials
       const supabase = createClient()
       const { error: signInErr } = await supabase.auth.signInWithPassword({ email, password })
       if (signInErr) {
@@ -81,6 +81,7 @@ export default function SignupPage() {
         return
       }
       setStep(3)
+      router.refresh()          // flush Next.js server-component cache for new session
       router.push('/dashboard')
     } catch {
       setError('Network error. Please try again.')

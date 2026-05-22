@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerComponentClient, createAdminClient } from '@/lib/supabase-server'
-import { gateway, PLANS } from '@/lib/braintree'
+import { getGateway, PLANS } from '@/lib/braintree'
 
 export async function POST(req: NextRequest) {
   const supabase = createServerComponentClient()
@@ -43,6 +43,8 @@ export async function POST(req: NextRequest) {
     .single()
 
   let customerId: string = org?.braintree_customer_id ?? ''
+
+  const gateway = getGateway()
 
   // Create customer if not already stored
   if (!customerId) {

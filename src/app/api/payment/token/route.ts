@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createServerComponentClient, createAdminClient } from '@/lib/supabase-server'
-import { gateway } from '@/lib/braintree'
+import { getGateway } from '@/lib/braintree'
 
 export async function GET() {
   const supabase = createServerComponentClient()
@@ -22,7 +22,7 @@ export async function GET() {
     customerId = org?.braintree_customer_id ?? undefined
   }
 
-  const tokenResponse = await gateway.clientToken.generate(
+  const tokenResponse = await getGateway().clientToken.generate(
     customerId ? { customerId } : {}
   )
 

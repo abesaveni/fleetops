@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase-server'
-import { gateway } from '@/lib/braintree'
+import { getGateway } from '@/lib/braintree'
 
 export async function POST(req: NextRequest) {
   const formData = await req.formData().catch(() => null)
@@ -13,6 +13,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Missing webhook params' }, { status: 400 })
   }
 
+  const gateway = getGateway()
   let notification: Awaited<ReturnType<typeof gateway.webhookNotification.parse>>
   try {
     notification = await gateway.webhookNotification.parse(btSignature, btPayload)

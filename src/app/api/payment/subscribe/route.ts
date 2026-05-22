@@ -84,8 +84,8 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  // Update org plan + bus limit
-  const updates: Record<string, unknown> = {
+  // Update org plan + bus limit — try full update first, fall back to core columns
+  const fullUpdates: Record<string, unknown> = {
     plan:            planId,
     status:          'active',
     bus_limit:       plan.bus_limit,
@@ -96,18 +96,33 @@ export async function POST(req: NextRequest) {
     updated_at: new Date().toISOString(),
   }
 
-  const { error: updateErr } = await admin
+  let { error: updateErr } = await admin
     .from('organizations')
-    .update(updates)
+    .update(fullUpdates)
     .eq('id', orgId)
 
   if (updateErr) {
-    // Payment succeeded but DB update failed — log and return partial success
-    console.error('Failed to update org after payment:', updateErr)
-    return NextResponse.json(
-      { error: 'Payment processed but plan update failed. Contact support.' },
-      { status: 500 }
-    )
+    // Braintree/billing columns may not be migrated yet — fall back to core fields
+    console.warn('Full update failed, trying core update:', updateErr.message)
+    const coreUpdates = {
+      plan:      planId,
+      status:    'active',
+      bus_limit: plan.bus_limit,
+      updated_at: new Date().toISOString(),
+    }
+    const { error: coreErr } = await admin
+      .from('organizations')
+      .update(coreUpdates)
+      .eq('id', orgId)
+
+    if (coreErr) {
+      console.error('Core update also failed:', coreErr)
+      return NextResponse.json(
+        { error: 'Payment processed but plan update failed. Contact support.' },
+        { status: 500 }
+      )
+    }
+    updateErr = null  // core succeeded — continue to return success
   }
 
   return NextResponse.json({

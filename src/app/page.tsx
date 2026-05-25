@@ -15,14 +15,14 @@ export default async function Home() {
         <div style={{ maxWidth: 1140, margin: '0 auto', padding: '0 24px', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ width: 34, height: 34, background: '#0f172a', borderRadius: 9, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                <rect x="1" y="7" width="22" height="13" rx="2" stroke="#fff" strokeWidth="1.6"/>
-                <circle cx="6" cy="20" r="2" fill="#60a5fa"/>
-                <circle cx="18" cy="20" r="2" fill="#60a5fa"/>
-                <path d="M4 7V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2" stroke="#fff" strokeWidth="1.6"/>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="10" stroke="#60a5fa" strokeWidth="1.6"/>
+                <path d="M12 2a10 10 0 0 1 0 20A10 10 0 0 1 12 2" stroke="none"/>
+                <path d="M9.5 8.5 L9.5 15.5 M9.5 8.5 L14 12 L9.5 15.5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <circle cx="12" cy="12" r="3.5" stroke="#60a5fa" strokeWidth="1.2" fill="none"/>
               </svg>
             </div>
-            <span style={{ fontSize: 17, fontWeight: 700, color: '#0f172a', letterSpacing: '-0.02em' }}>FleetOps</span>
+            <span style={{ fontSize: 17, fontWeight: 700, color: '#0f172a', letterSpacing: '-0.02em' }}>Trackitlio</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <Link href="/login" style={{ fontSize: 14, fontWeight: 500, color: '#475569', textDecoration: 'none', padding: '8px 16px' }}>Sign In</Link>
@@ -36,7 +36,7 @@ export default async function Home() {
         <div style={{ maxWidth: 760, margin: '0 auto', textAlign: 'center' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: '#dbeafe', color: '#1d4ed8', fontSize: 12.5, fontWeight: 600, padding: '5px 14px', borderRadius: 20, marginBottom: 28, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#2563eb', display: 'inline-block' }}/>
-            Built for U.S. Transit Agencies
+            Built for Transit Agencies Worldwide
           </div>
           <h1 style={{ fontSize: 54, fontWeight: 800, color: '#0f172a', letterSpacing: '-0.04em', lineHeight: 1.1, margin: '0 0 20px' }}>
             Fleet Operations,<br/><span style={{ color: '#2563eb' }}>Simplified.</span>
@@ -107,7 +107,7 @@ export default async function Home() {
                   </svg>
                 ),
                 title: 'Instant Reports',
-                desc: 'Generate PDF and CSV fleet reports in seconds. Filter by status, export for FTA compliance or internal review.',
+                desc: 'Generate PDF and CSV fleet reports in seconds. Filter by status, export for compliance audits or internal review.',
               },
               {
                 icon: (
@@ -160,7 +160,7 @@ export default async function Home() {
         <div style={{ maxWidth: 640, margin: '0 auto', textAlign: 'center' }}>
           <h2 style={{ fontSize: 34, fontWeight: 800, color: '#fff', letterSpacing: '-0.03em', margin: '0 0 14px' }}>Ready to modernize your fleet ops?</h2>
           <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.75)', margin: '0 0 32px', lineHeight: 1.6 }}>
-            Join transit agencies across the U.S. using FleetOps to stay on top of their fleet every single day.
+            Join transit agencies worldwide using Trackitlio to stay on top of their fleet every single day.
           </p>
           <Link href="/signup" style={{ display: 'inline-block', fontSize: 15, fontWeight: 700, color: '#1e40af', background: '#fff', padding: '14px 36px', borderRadius: 10, textDecoration: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.2)' }}>
             Start Your Free Trial →
@@ -173,14 +173,13 @@ export default async function Home() {
         <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <div style={{ width: 28, height: 28, background: '#1e293b', borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-                <rect x="1" y="7" width="22" height="13" rx="2" stroke="#60a5fa" strokeWidth="1.6"/>
-                <circle cx="6" cy="20" r="2" fill="#60a5fa"/>
-                <circle cx="18" cy="20" r="2" fill="#60a5fa"/>
-                <path d="M4 7V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2" stroke="#60a5fa" strokeWidth="1.6"/>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="10" stroke="#60a5fa" strokeWidth="1.6"/>
+                <path d="M9.5 8.5 L9.5 15.5 M9.5 8.5 L14 12 L9.5 15.5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <circle cx="12" cy="12" r="3.5" stroke="#60a5fa" strokeWidth="1.2" fill="none"/>
               </svg>
             </div>
-            <span style={{ fontSize: 14, fontWeight: 600, color: '#cbd5e1' }}>FleetOps</span>
+            <span style={{ fontSize: 14, fontWeight: 600, color: '#cbd5e1' }}>Trackitlio</span>
             <span style={{ fontSize: 12, color: '#475569', marginLeft: 8 }}>© {new Date().getFullYear()} All rights reserved.</span>
           </div>
           <div style={{ display: 'flex', gap: 24 }}>

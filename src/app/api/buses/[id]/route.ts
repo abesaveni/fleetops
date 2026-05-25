@@ -18,6 +18,12 @@ async function getCallerSub(user: { email: string; app_metadata?: Record<string,
   return data
 }
 
+function makeWONumber() {
+  const date = new Date().toISOString().slice(0, 10).replace(/-/g, '')
+  const rand = Math.floor(1000 + Math.random() * 9000)
+  return `WO-${date}-${rand}`
+}
+
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   const supabase = createServerComponentClient()
   const { data: { session } } = await supabase.auth.getSession()
@@ -30,11 +36,30 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
   const body  = await req.json()
   const admin = createAdminClient()
+
+  // Get current bus state so we can detect workflow transitions
+  const { data: currentBus } = await admin
+    .from('bus_records')
+    .select('out_of_service_date, back_in_service_date, bus_status')
+    .eq('id', params.id)
+    .eq('org_id', sub.org_id)
+    .single()
+
+  if (!currentBus) return NextResponse.json({ error: 'Bus not found' }, { status: 404 })
+
+  const settingOOS = body.out_of_service_date && !currentBus.out_of_service_date
+  const settingBIS = body.back_in_service_date && !currentBus.back_in_service_date
+
+  // Workflow-driven status — override whatever the form sent
+  let bus_status = body.bus_status ?? currentBus.bus_status
+  if (settingOOS) bus_status = 'OOS'
+  if (settingBIS) bus_status = 'RS'
+
   const { data, error } = await admin
     .from('bus_records')
     .update({
       bus_id:                body.bus_id               || undefined,
-      bus_status:            body.bus_status,
+      bus_status,
       manufacturer:          body.manufacturer          ?? null,
       year_of_manufacture:   body.year_of_manufacture   || null,
       bus_system:            body.bus_system            || null,
@@ -54,6 +79,56 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 })
+
+  // ── Work Order: auto-create when Dispatch sets Date Out of Service ──────
+  if (settingOOS) {
+    // Only create if no open work order already exists for this bus
+    const { data: existingWO } = await admin
+      .from('work_orders')
+      .select('id')
+      .eq('bus_record_id', params.id)
+      .in('status', ['open', 'under_repair', 'pending_parts'])
+      .maybeSingle()
+
+    if (!existingWO) {
+      await admin.from('work_orders').insert({
+        org_id:              sub.org_id,
+        bus_record_id:       params.id,
+        wo_number:           makeWONumber(),
+        status:              'open',
+        date_out_of_service: body.out_of_service_date,
+        problem_description: body.problem_description || null,
+        asset_location:      body.location            || null,
+        created_by:          session.user.email,
+      })
+    }
+  }
+
+  // ── Work Order: auto-close when Maintenance sets Back in Service Date ───
+  if (settingBIS) {
+    const { data: openWO } = await admin
+      .from('work_orders')
+      .select('id')
+      .eq('bus_record_id', params.id)
+      .in('status', ['open', 'under_repair', 'pending_parts'])
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    if (openWO) {
+      await admin.from('work_orders').update({
+        status:                'returned_to_service',
+        back_in_service_date:  body.back_in_service_date,
+        bus_system:            body.bus_system            || null,
+        estimated_repair_time: body.estimated_repair_time || null,
+        maintenance_comments:  body.maintenance_comments  || null,
+        labour_cost:           body.labour_cost           ?? null,
+        parts_cost:            body.parts_cost            ?? null,
+        closed_at:             new Date().toISOString(),
+      }).eq('id', openWO.id)
+    }
+  }
+
   return NextResponse.json(data)
 }
 

@@ -194,6 +194,12 @@ export default function BusForm({ bus, mode, userRole }: { bus?: BusRecord; mode
             />
           </div>
         </div>
+        {isDispatch && (
+          <div style={{ marginTop: 12, padding: '10px 14px', background: '#fef2f2', borderRadius: 8, border: '1px solid #fecaca', fontSize: 12.5, color: '#991b1b' }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{ display: 'inline', marginRight: 6 }}><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Setting a <strong>Date Out of Service</strong> will automatically create a Work Order and change the bus status to <strong>Out of Service</strong>.
+          </div>
+        )}
       </div>
 
       {/* ── Section 3: Maintenance / Work Order ── */}
@@ -285,10 +291,10 @@ export default function BusForm({ bus, mode, userRole }: { bus?: BusRecord; mode
           </div>
         </div>
 
-        {mode === 'edit' && isMaintenance && (
-          <div style={{ marginTop: 12, padding: '10px 14px', background: '#eff6ff', borderRadius: 8, border: '1px solid #bfdbfe', fontSize: 12.5, color: '#1e40af' }}>
+        {isMaintenance && (
+          <div style={{ marginTop: 12, padding: '10px 14px', background: '#fff7ed', borderRadius: 8, border: '1px solid #fed7aa', fontSize: 12.5, color: '#9a3412' }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{ display: 'inline', marginRight: 6 }}><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            A work order will be created when maintenance information is saved. The bus status will update automatically when the bus is back in service.
+            Setting a <strong>Back in Service Date</strong> will automatically close the open Work Order and change the bus status to <strong>Returned to Service</strong>.
           </div>
         )}
       </div>

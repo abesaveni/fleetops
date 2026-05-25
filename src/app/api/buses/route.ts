@@ -49,10 +49,14 @@ export async function POST(req: NextRequest) {
   // ─────────────────────────────────────────────────────────────────────────
 
   const body = await req.json()
+
+  // If Dispatch is creating a bus already out of service, force OOS status
+  const bus_status = body.out_of_service_date ? 'OOS' : (body.bus_status || 'IS')
+
   const { data, error } = await admin.from('bus_records').insert([{
     org_id:                sub.org_id,
     bus_id:                body.bus_id,
-    bus_status:            body.bus_status            || 'IS',
+    bus_status,
     manufacturer:          body.manufacturer          || null,
     year_of_manufacture:   body.year_of_manufacture   || null,
     bus_system:            body.bus_system            || null,
@@ -68,5 +72,22 @@ export async function POST(req: NextRequest) {
   }]).select().single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 })
+
+  // Auto-create work order if bus is being added as already out of service
+  if (body.out_of_service_date && data) {
+    const date  = new Date().toISOString().slice(0, 10).replace(/-/g, '')
+    const rand  = Math.floor(1000 + Math.random() * 9000)
+    await admin.from('work_orders').insert({
+      org_id:              sub.org_id,
+      bus_record_id:       data.id,
+      wo_number:           `WO-${date}-${rand}`,
+      status:              'open',
+      date_out_of_service: body.out_of_service_date,
+      problem_description: body.problem_description || null,
+      asset_location:      body.location            || null,
+      created_by:          session.user.email,
+    })
+  }
+
   return NextResponse.json(data, { status: 201 })
 }

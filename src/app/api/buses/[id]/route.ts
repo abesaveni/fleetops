@@ -47,12 +47,13 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
   if (!currentBus) return NextResponse.json({ error: 'Bus not found' }, { status: 404 })
 
-  const settingOOS = body.out_of_service_date && !currentBus.out_of_service_date
-  const settingBIS = body.back_in_service_date && !currentBus.back_in_service_date
+  const settingOOS = !!(body.out_of_service_date && !currentBus.out_of_service_date)
+  // BIS triggers any time the date is provided — close block is idempotent (finds open WO or skips)
+  const settingBIS = !!body.back_in_service_date
 
   // Workflow-driven status — override whatever the form sent
   let bus_status = body.bus_status ?? currentBus.bus_status
-  if (settingOOS) bus_status = 'OOS'
+  if (settingOOS && !settingBIS) bus_status = 'OOS'
   if (settingBIS) bus_status = 'RS'
 
   const { data, error } = await admin
@@ -149,6 +150,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       const sync: Record<string, unknown> = {}
       if (body.bus_system            != null) sync.bus_system            = body.bus_system            || null
       if (body.estimated_repair_time != null) sync.estimated_repair_time = body.estimated_repair_time || null
+      if (body.back_in_service_date  != null) sync.back_in_service_date  = body.back_in_service_date  || null
       if (body.labour_cost           != null) sync.labour_cost           = body.labour_cost
       if (body.parts_cost            != null) sync.parts_cost            = body.parts_cost
       if (body.maintenance_comments  != null) sync.maintenance_comments  = body.maintenance_comments  || null

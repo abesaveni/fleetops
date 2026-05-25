@@ -5,7 +5,7 @@ import type { Organization, UserSubscription } from '@/types'
 import Toast from '@/components/Toast'
 
 const PLANS = [
-  { id: 'trial',      label: 'Trial (Free)',   limit: 5,   mrr: 0 },
+  { id: 'trial',      label: 'Trial (Free)',   limit: 10,  mrr: 0 },
   { id: 'pro',        label: 'Pro',            limit: 50,  mrr: 49 },
   { id: 'business',   label: 'Business',       limit: 250, mrr: 149 },
   { id: 'enterprise', label: 'Enterprise',     limit: null, mrr: 0 },

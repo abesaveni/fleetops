@@ -12,16 +12,17 @@ export default async function DashboardPage() {
   const sub = await getSubFromSession(session.user as any)
   if (!sub || !sub.is_active) redirect('/no-access')
 
-  const [counts, buses] = await Promise.all([
+  const [rawCounts, buses] = await Promise.all([
     getDashboardCounts(sub.org_id),
     getAllBuses(sub.org_id),
   ])
+  const counts = { total: rawCounts.total, IS: rawCounts.IS, OOS: rawCounts.OOS, UR: rawCounts.UR ?? 0, PP: rawCounts.PP ?? 0, RS: rawCounts.RS ?? 0 }
 
   return (
     <div className="layout">
       <Sidebar/>
       <main className="main-content">
-        <DashboardClient counts={counts} buses={buses} userRole={sub.subscription_type}/>
+        <DashboardClient counts={counts as any} buses={buses} userRole={sub.subscription_type}/>
       </main>
     </div>
   )

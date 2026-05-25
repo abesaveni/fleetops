@@ -53,6 +53,8 @@ export async function POST(req: NextRequest) {
     org_id:                sub.org_id,
     bus_id:                body.bus_id,
     bus_status:            body.bus_status            || 'IS',
+    manufacturer:          body.manufacturer          || null,
+    year_of_manufacture:   body.year_of_manufacture   || null,
     bus_system:            body.bus_system            || null,
     location:              body.location              || null,
     bus_age:               body.bus_age               || null,
@@ -61,6 +63,8 @@ export async function POST(req: NextRequest) {
     estimated_repair_time: body.estimated_repair_time || null,
     problem_description:   body.problem_description   || null,
     maintenance_comments:  body.maintenance_comments  || null,
+    labour_cost:           body.labour_cost           ?? null,
+    parts_cost:            body.parts_cost            ?? null,
   }]).select().single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 })

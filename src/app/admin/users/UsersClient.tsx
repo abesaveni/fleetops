@@ -14,7 +14,7 @@ export default function UsersClient({ currentUserEmail }: { currentUserEmail: st
   const [loading, setLoading]   = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [toast, setToast]       = useState<string|null>(null)
-  const [form, setForm]         = useState({ email:'', password:'', role:'Viewer' })
+  const [form, setForm]         = useState({ email:'', password:'', role:'ViewOnly' })
   const [saving, setSaving]     = useState(false)
   const [created, setCreated]   = useState<{email:string;password:string}|null>(null)
 
@@ -31,7 +31,7 @@ export default function UsersClient({ currentUserEmail }: { currentUserEmail: st
 
   function openModal() {
     const pw = generatePassword()
-    setForm({ email:'', password:pw, role:'Viewer' })
+    setForm({ email:'', password:pw, role:'ViewOnly' })
     setCreated(null)
     setShowModal(true)
   }
@@ -128,7 +128,9 @@ export default function UsersClient({ currentUserEmail }: { currentUserEmail: st
                       onChange={e => changeRole(u, e.target.value)}
                     >
                       <option value="Admin">Admin</option>
-                      <option value="Viewer">Viewer</option>
+                      <option value="Dispatch">Dispatch</option>
+                      <option value="Maintenance">Maintenance</option>
+                      <option value="ViewOnly">View Only</option>
                     </select>
                   </td>
                   <td>
@@ -190,7 +192,9 @@ export default function UsersClient({ currentUserEmail }: { currentUserEmail: st
                     <div className="form-group">
                       <label className="form-label">Role</label>
                       <select className="input" value={form.role} onChange={e => setForm(f => ({...f, role:e.target.value}))}>
-                        <option value="Viewer">Viewer — can view all buses</option>
+                        <option value="ViewOnly">View Only — read-only access</option>
+                        <option value="Dispatch">Dispatch — report outages</option>
+                        <option value="Maintenance">Maintenance — complete work orders</option>
                         <option value="Admin">Admin — full access</option>
                       </select>
                     </div>

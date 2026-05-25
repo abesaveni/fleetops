@@ -35,8 +35,8 @@ export default function LoginPage() {
               <path d="M8 11h8M8 14h5" stroke="#60a5fa" strokeWidth="1.5" strokeLinecap="round"/>
             </svg>
           </div>
-          <h1 style={{ fontFamily: 'var(--font-body)', fontSize: 26, fontWeight: 700, letterSpacing: '-0.03em', margin: '0 0 5px', color: '#0f172a' }}>FleetOps</h1>
-          <p style={{ fontSize: 13.5, color: '#94a3b8', margin: 0 }}>Bus Fleet Management Platform</p>
+          <h1 style={{ fontFamily: 'var(--font-body)', fontSize: 26, fontWeight: 700, letterSpacing: '-0.03em', margin: '0 0 5px', color: '#0f172a' }}>Track-it-Lio</h1>
+          <p style={{ fontSize: 13.5, color: '#94a3b8', margin: 0 }}>Fleet Management · From Issue to Resolution</p>
         </div>
 
         {/* Card */}

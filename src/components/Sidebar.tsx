@@ -69,7 +69,7 @@ export default function Sidebar() {
             <BusIcon/>
           </div>
           <div>
-            <h1>FleetOps</h1>
+            <h1>Track-it-Lio</h1>
             <p>Fleet Management</p>
           </div>
         </div>
@@ -97,19 +97,21 @@ export default function Sidebar() {
             <rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="12" rx="1"/><rect x="17" y="3" width="5" height="15" rx="1"/>
           </svg>
         }/>
-        <NavLink href="/buses"              label="All Buses"      icon={<BusIcon/>}/>
-        <NavLink href="/buses?status=IS"    label="In Service"     sub icon={<span className="dot dot-IS"/>}/>
-        <NavLink href="/buses?status=OOS"   label="Out of Service" sub icon={<span className="dot dot-OOS"/>}/>
-        <NavLink href="/buses?status=InPro" label="Outfitting"     sub icon={<span className="dot dot-InPro"/>}/>
-        <NavLink href="/buses?status=WP"    label="Pending"        sub icon={<span className="dot dot-WP"/>}/>
-        <NavLink href="/buses/new" label="Add Bus" icon={
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
-          </svg>
-        }/>
+        <NavLink href="/buses"           label="All Buses"      icon={<BusIcon/>}/>
+        <NavLink href="/buses?status=IS"  label="In Service"     sub icon={<span className="dot dot-IS"/>}/>
+        <NavLink href="/buses?status=OOS" label="Out of Service" sub icon={<span className="dot dot-OOS"/>}/>
+        <NavLink href="/buses?status=UR"  label="Under Repair"   sub icon={<span className="dot dot-UR"/>}/>
+        <NavLink href="/buses?status=PP"  label="Pending Parts"  sub icon={<span className="dot dot-PP"/>}/>
+        {isAdmin && (
+          <NavLink href="/buses/new" label="Add Bus" icon={
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
+            </svg>
+          }/>
+        )}
 
         <div className="nav-section-label" style={{ marginTop: 4 }}>Reports</div>
-        <NavLink href="/admin/invoice" label="Fleet Report" icon={
+        <NavLink href="/work-orders" label="Work Order Reports" icon={
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
             <polyline points="14 2 14 8 20 8"/>
@@ -140,7 +142,6 @@ export default function Sidebar() {
       </nav>
 
       <div className="sidebar-footer">
-        {/* Show bus capacity bar for orgs with a limit */}
         {user?.bus_limit !== null && user?.bus_limit !== undefined && user.bus_count !== null && (
           <div style={{ marginBottom: 10 }}>
             <BusUsageBar count={user.bus_count ?? 0} limit={user.bus_limit}/>

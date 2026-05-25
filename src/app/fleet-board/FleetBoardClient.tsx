@@ -5,10 +5,11 @@ import type { BusRecord } from '@/types'
 import Toast from '@/components/Toast'
 
 const STATUS_CONFIG = {
-  IS:    { label:'In Service',            cellBg:'#16a34a', cellText:'#ffffff', legendBg:'#dcfce7', legendText:'#15803d' },
-  OOS:   { label:'Out of Service',        cellBg:'#dc2626', cellText:'#ffffff', legendBg:'#fee2e2', legendText:'#b91c1c' },
-  InPro: { label:'Outfitting & Commissioning', cellBg:'#ea580c', cellText:'#ffffff', legendBg:'#ffedd5', legendText:'#c2410c' },
-  WP:    { label:'Pending',                    cellBg:'#cbd5e1', cellText:'#334155', legendBg:'#f1f5f9', legendText:'#475569' },
+  IS:  { label:'In Service',            cellBg:'#16a34a', cellText:'#ffffff', legendBg:'#dcfce7', legendText:'#15803d' },
+  OOS: { label:'Out of Service',        cellBg:'#dc2626', cellText:'#ffffff', legendBg:'#fee2e2', legendText:'#b91c1c' },
+  UR:  { label:'Under Repair',          cellBg:'#ea580c', cellText:'#ffffff', legendBg:'#ffedd5', legendText:'#c2410c' },
+  PP:  { label:'Pending Parts',         cellBg:'#ca8a04', cellText:'#ffffff', legendBg:'#fef9c3', legendText:'#854d0e' },
+  RS:  { label:'Returned to Service',   cellBg:'#0891b2', cellText:'#ffffff', legendBg:'#d0f4f7', legendText:'#0e7490' },
 } as const
 
 export default function FleetBoardClient({ buses, userRole }: { buses: BusRecord[]; userRole: string }) {
@@ -27,17 +28,17 @@ export default function FleetBoardClient({ buses, userRole }: { buses: BusRecord
   function showToast(msg: string) { setToast(msg); setTimeout(() => setToast(null), 3000) }
 
   function exportCsv(busList: BusRecord[], label: string) {
-    const headers = ['Bus ID','Status','Bus System','Location','Age','OOS Date','BIS Date','Problem Description','Maintenance Comments']
+    const headers = ['Bus ID','Status','Manufacturer','Bus System','Location','OOS Date','BIS Date','Problem Description']
     const rows = busList.map(b => [
-      b.bus_id, b.bus_status, b.bus_system??'', b.location??'', b.bus_age??'',
+      b.bus_id, b.bus_status, b.manufacturer??'', b.bus_system??'', b.location??'',
       b.out_of_service_date??'', b.back_in_service_date??'',
-      (b.problem_description??'').replace(/,/g,' '), (b.maintenance_comments??'').replace(/,/g,' ')
+      (b.problem_description??'').replace(/,/g,' ')
     ])
     const csv = [headers, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n')
     const blob = new Blob([csv], { type:'text/csv' })
     const url  = URL.createObjectURL(blob)
     const a    = document.createElement('a'); a.href = url
-    a.download = `FleetOps_${label}_${now.toISOString().slice(0,10)}.csv`; a.click()
+    a.download = `TrackitLio_${label}_${now.toISOString().slice(0,10)}.csv`; a.click()
     URL.revokeObjectURL(url)
     showToast(`${label} CSV downloaded`)
     setExportMenu(false)
@@ -51,7 +52,7 @@ export default function FleetBoardClient({ buses, userRole }: { buses: BusRecord
       const blob = await res.blob()
       const url  = URL.createObjectURL(blob)
       const a    = document.createElement('a'); a.href = url
-      a.download = `FleetOps_${label}_${now.toISOString().slice(0,10)}.pdf`; a.click()
+      a.download = `TrackitLio_${label}_${now.toISOString().slice(0,10)}.pdf`; a.click()
       URL.revokeObjectURL(url)
       showToast(`PDF downloaded`)
     } catch { showToast('Error generating PDF') }
@@ -66,10 +67,11 @@ export default function FleetBoardClient({ buses, userRole }: { buses: BusRecord
   }, [buses, search])
 
   const counts = useMemo(() => ({
-    IS:    buses.filter(b => b.bus_status === 'IS').length,
-    OOS:   buses.filter(b => b.bus_status === 'OOS').length,
-    InPro: buses.filter(b => b.bus_status === 'InPro').length,
-    WP:    buses.filter(b => b.bus_status === 'WP').length,
+    IS:  buses.filter(b => b.bus_status === 'IS').length,
+    OOS: buses.filter(b => b.bus_status === 'OOS').length,
+    UR:  buses.filter(b => b.bus_status === 'UR').length,
+    PP:  buses.filter(b => b.bus_status === 'PP').length,
+    RS:  buses.filter(b => b.bus_status === 'RS').length,
   }), [buses])
 
   const hoveredBus = hovered ? buses.find(b => b.id === hovered) : null
@@ -78,14 +80,12 @@ export default function FleetBoardClient({ buses, userRole }: { buses: BusRecord
     <>
       {toast && <Toast message={toast}/>}
 
-      {/* Header */}
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:16, flexWrap:'wrap', gap:10 }}>
         <div>
           <h1 style={{ fontSize:20, fontWeight:600, margin:0, color:'#0f172a', letterSpacing:'-0.02em' }}>Fleet Board</h1>
           <p style={{ fontSize:12, color:'#94a3b8', margin:'3px 0 0', fontWeight:400 }}>{buses.length} buses · {dateStr} · {timeStr}</p>
         </div>
         <div style={{ display:'flex', gap:8, alignItems:'center' }}>
-          {/* Search */}
           <div style={{ position:'relative' }}>
             <svg style={{ position:'absolute', left:9, top:'50%', transform:'translateY(-50%)', color:'#94a3b8' }} width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             <input
@@ -93,7 +93,6 @@ export default function FleetBoardClient({ buses, userRole }: { buses: BusRecord
               placeholder="Search buses…" value={search} onChange={e => setSearch(e.target.value)}
             />
           </div>
-          {/* Export */}
           <div style={{ position:'relative' }}>
             <button
               onClick={() => setExportMenu(!exportMenu)}
@@ -109,25 +108,15 @@ export default function FleetBoardClient({ buses, userRole }: { buses: BusRecord
                 style={{ position:'absolute', right:0, top:'calc(100% + 4px)', background:'#fff', border:'1px solid #e2e8f0', borderRadius:10, boxShadow:'0 8px 24px rgba(0,0,0,0.10)', zIndex:50, minWidth:160, overflow:'hidden' }}
                 onMouseLeave={() => setExportMenu(false)}
               >
-                {(['All','IS','OOS','InPro','WP'] as const).map((key, i) => {
+                {(['All','IS','OOS','UR','PP','RS'] as const).map((key, i) => {
                   const busList = key === 'All' ? filtered : filtered.filter(b => b.bus_status === key)
                   const label   = key === 'All' ? 'All Buses' : STATUS_CONFIG[key].label
                   return (
                     <div key={key} style={{ borderTop: i > 0 ? '1px solid #f1f5f9' : 'none' }}>
                       <div style={{ padding:'6px 14px 2px', fontSize:10, color:'#94a3b8', textTransform:'uppercase', letterSpacing:'0.06em', fontWeight:500 }}>{label}</div>
                       <div style={{ display:'flex' }}>
-                        <button
-                          onClick={() => exportCsv(busList, label)}
-                          style={{ flex:1, padding:'6px 14px', background:'none', border:'none', cursor:'pointer', fontSize:12, color:'#334155', textAlign:'left', fontFamily:'inherit' }}
-                          onMouseEnter={e => (e.currentTarget.style.background='#f8fafc')}
-                          onMouseLeave={e => (e.currentTarget.style.background='none')}
-                        >CSV</button>
-                        <button
-                          onClick={() => exportPdf(busList, label)}
-                          style={{ flex:1, padding:'6px 14px', background:'none', border:'none', borderLeft:'1px solid #f1f5f9', cursor:'pointer', fontSize:12, color:'#334155', textAlign:'left', fontFamily:'inherit' }}
-                          onMouseEnter={e => (e.currentTarget.style.background='#f8fafc')}
-                          onMouseLeave={e => (e.currentTarget.style.background='none')}
-                        >PDF</button>
+                        <button onClick={() => exportCsv(busList, label)} style={{ flex:1, padding:'6px 14px', background:'none', border:'none', cursor:'pointer', fontSize:12, color:'#334155', textAlign:'left', fontFamily:'inherit' }} onMouseEnter={e => (e.currentTarget.style.background='#f8fafc')} onMouseLeave={e => (e.currentTarget.style.background='none')}>CSV</button>
+                        <button onClick={() => exportPdf(busList, label)} style={{ flex:1, padding:'6px 14px', background:'none', border:'none', borderLeft:'1px solid #f1f5f9', cursor:'pointer', fontSize:12, color:'#334155', textAlign:'left', fontFamily:'inherit' }} onMouseEnter={e => (e.currentTarget.style.background='#f8fafc')} onMouseLeave={e => (e.currentTarget.style.background='none')}>PDF</button>
                       </div>
                     </div>
                   )
@@ -144,15 +133,14 @@ export default function FleetBoardClient({ buses, userRole }: { buses: BusRecord
         </div>
       </div>
 
-      {/* Grid board */}
       <div style={{ background:'#fff', border:'1px solid #e2e8f0', borderRadius:12, overflow:'hidden' }}>
-        {/* Grid */}
         <div style={{ padding:'16px', display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(96px, 1fr))', gap:5 }}>
           {filtered.length === 0 ? (
             <div style={{ gridColumn:'1/-1', padding:'40px', textAlign:'center', color:'#94a3b8', fontSize:13 }}>No buses found</div>
           ) : filtered.map(bus => {
-            const cfg = STATUS_CONFIG[bus.bus_status as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG.WP
+            const cfg = STATUS_CONFIG[bus.bus_status as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG.OOS
             const isHov = hovered === bus.id
+            const hoverBg: Record<string,string> = { IS:'#15803d', OOS:'#b91c1c', UR:'#c2410c', PP:'#a16207', RS:'#0e7490' }
             return (
               <button
                 key={bus.id}
@@ -160,64 +148,43 @@ export default function FleetBoardClient({ buses, userRole }: { buses: BusRecord
                 onMouseEnter={() => setHovered(bus.id)}
                 onMouseLeave={() => setHovered(null)}
                 style={{
-                  background: isHov ? (bus.bus_status === 'IS' ? '#15803d' : bus.bus_status === 'OOS' ? '#b91c1c' : bus.bus_status === 'InPro' ? '#c2410c' : '#94a3b8') : cfg.cellBg,
+                  background: isHov ? (hoverBg[bus.bus_status] ?? cfg.cellBg) : cfg.cellBg,
                   color: cfg.cellText,
-                  border: 'none',
-                  borderRadius: 6,
-                  padding: '10px 8px',
-                  cursor: 'pointer',
-                  fontFamily: 'var(--font-body)',
-                  textAlign: 'center',
-                  transition: 'all 0.1s',
-                  minHeight: 56,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 2,
+                  border: 'none', borderRadius: 6, padding: '10px 8px',
+                  cursor: 'pointer', fontFamily: 'var(--font-body)', textAlign: 'center',
+                  transition: 'all 0.1s', minHeight: 56,
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2,
                   transform: isHov ? 'scale(1.06)' : 'scale(1)',
                   boxShadow: isHov ? '0 4px 12px rgba(0,0,0,0.18)' : 'none',
-                  zIndex: isHov ? 2 : 1,
-                  position: 'relative',
+                  zIndex: isHov ? 2 : 1, position: 'relative',
                 }}
               >
                 <span style={{ fontSize:13, fontWeight:700, letterSpacing:'0.01em', lineHeight:1.2 }}>{bus.bus_id}</span>
-                {bus.bus_status === 'WP' && (
-                  <span style={{ fontSize:11, fontWeight:500, opacity:0.7 }}>PENDING</span>
-                )}
-                {bus.bus_status === 'InPro' && (
-                  <span style={{ fontSize:10, fontWeight:500, opacity:0.8 }}>OUTFITTING</span>
-                )}
+                {bus.bus_status === 'PP' && <span style={{ fontSize:10, fontWeight:500, opacity:0.85 }}>PARTS</span>}
+                {bus.bus_status === 'UR' && <span style={{ fontSize:10, fontWeight:500, opacity:0.85 }}>REPAIR</span>}
+                {bus.bus_status === 'RS' && <span style={{ fontSize:10, fontWeight:500, opacity:0.85 }}>RETURNED</span>}
               </button>
             )
           })}
         </div>
 
-        {/* Hover tooltip */}
         {hoveredBus && (
           <div style={{ margin:'0 16px', padding:'10px 14px', background:'#f8fafc', borderRadius:8, border:'1px solid #e2e8f0', fontSize:12, display:'flex', gap:20, flexWrap:'wrap', marginBottom:0 }}>
             <span><strong style={{ color:'#0f172a', fontWeight:600 }}>{hoveredBus.bus_id}</strong></span>
             <span style={{ color:'#64748b' }}>{STATUS_CONFIG[hoveredBus.bus_status as keyof typeof STATUS_CONFIG]?.label}</span>
+            {hoveredBus.manufacturer && <span style={{ color:'#64748b' }}>{hoveredBus.manufacturer}</span>}
             {hoveredBus.bus_system && <span style={{ color:'#64748b' }}>{hoveredBus.bus_system}</span>}
             {hoveredBus.location && <span style={{ color:'#64748b' }}>{hoveredBus.location}</span>}
             {hoveredBus.problem_description && <span style={{ color:'#dc2626' }}>{hoveredBus.problem_description}</span>}
             {isAdmin && (
-              <button
-                onClick={e => { e.stopPropagation(); router.push(`/buses/${hoveredBus.id}/edit`) }}
-                style={{ marginLeft:'auto', fontSize:11, color:'#1d6fce', background:'none', border:'1px solid #bfdbfe', borderRadius:5, padding:'2px 8px', cursor:'pointer', fontFamily:'inherit' }}
-              >Edit</button>
+              <button onClick={e => { e.stopPropagation(); router.push(`/buses/${hoveredBus.id}/edit`) }} style={{ marginLeft:'auto', fontSize:11, color:'#1d6fce', background:'none', border:'1px solid #bfdbfe', borderRadius:5, padding:'2px 8px', cursor:'pointer', fontFamily:'inherit' }}>Edit</button>
             )}
           </div>
         )}
 
-        {/* Legend / summary bar */}
         <div style={{ padding:'12px 16px', borderTop:'1px solid #f1f5f9', display:'flex', gap:6, alignItems:'center', flexWrap:'wrap' }}>
           {(Object.keys(STATUS_CONFIG) as (keyof typeof STATUS_CONFIG)[]).map(key => (
-            <div
-              key={key}
-              onClick={() => router.push(`/buses?status=${key}`)}
-              style={{ display:'flex', alignItems:'center', gap:6, padding:'5px 12px', borderRadius:7, background:STATUS_CONFIG[key].legendBg, cursor:'pointer', border:`1px solid ${STATUS_CONFIG[key].legendBg}` }}
-            >
+            <div key={key} onClick={() => router.push(`/buses?status=${key}`)} style={{ display:'flex', alignItems:'center', gap:6, padding:'5px 12px', borderRadius:7, background:STATUS_CONFIG[key].legendBg, cursor:'pointer', border:`1px solid ${STATUS_CONFIG[key].legendBg}` }}>
               <span style={{ width:8, height:8, borderRadius:2, background:STATUS_CONFIG[key].cellBg, display:'inline-block', flexShrink:0 }}/>
               <span style={{ fontSize:11, color:STATUS_CONFIG[key].legendText, fontWeight:400 }}>{STATUS_CONFIG[key].label}</span>
               <span style={{ fontSize:12, fontWeight:700, color:STATUS_CONFIG[key].legendText }}>{counts[key]}</span>

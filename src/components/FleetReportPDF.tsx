@@ -2,8 +2,20 @@ import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer'
 import type { BusRecord } from '@/types'
 import { STATUS_LABELS } from '@/types'
 
-const STATUS_COLOR: Record<string,string> = { IS:'#166534', OOS:'#991b1b', InPro:'#9a3412', WP:'#1e40af' }
-const STATUS_BG: Record<string,string>    = { IS:'#dcfce7', OOS:'#fee2e2', InPro:'#fff7ed', WP:'#dbeafe' }
+const STATUS_COLOR: Record<string,string> = {
+  IS:  '#166534',
+  OOS: '#991b1b',
+  UR:  '#9a3412',
+  PP:  '#854d0e',
+  RS:  '#0e7490',
+}
+const STATUS_BG: Record<string,string> = {
+  IS:  '#dcfce7',
+  OOS: '#fee2e2',
+  UR:  '#fff7ed',
+  PP:  '#fef9c3',
+  RS:  '#d0f4f7',
+}
 
 const s = StyleSheet.create({
   page:    { fontFamily:'Helvetica', fontSize:9, color:'#0f172a', backgroundColor:'#fff', padding:'36pt 40pt' },
@@ -28,22 +40,30 @@ const s = StyleSheet.create({
 const W = { id:'12%', status:'18%', system:'18%', location:'16%', age:'10%', oos:'13%', bis:'13%' }
 
 export default function FleetReportPDF({ buses }: { buses: BusRecord[] }) {
-  const date  = new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'})
-  const IS    = buses.filter(b=>b.bus_status==='IS').length
-  const OOS   = buses.filter(b=>b.bus_status==='OOS').length
-  const InPro = buses.filter(b=>b.bus_status==='InPro').length
-  const WP    = buses.filter(b=>b.bus_status==='WP').length
-  const fmt   = (d:string|null) => d ? new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '—'
+  const date = new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'})
+  const IS   = buses.filter(b=>b.bus_status==='IS').length
+  const OOS  = buses.filter(b=>b.bus_status==='OOS').length
+  const UR   = buses.filter(b=>b.bus_status==='UR').length
+  const PP   = buses.filter(b=>b.bus_status==='PP').length
+  const RS   = buses.filter(b=>b.bus_status==='RS').length
+  const fmt  = (d:string|null) => d ? new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '—'
 
   return (
     <Document>
       <Page size="A4" orientation="landscape" style={s.page}>
         <View style={s.header}>
-          <View><Text style={s.logo}>FleetOps</Text><Text style={s.tagline}>Bus Fleet Management System</Text></View>
+          <View><Text style={s.logo}>Track-it-Lio</Text><Text style={s.tagline}>Fleet Management · From Issue to Resolution</Text></View>
           <View><Text style={[s.secTitle,{fontSize:11}]}>Fleet Report</Text><Text style={{fontSize:9,color:'#475569'}}>{date}</Text></View>
         </View>
         <View style={s.statsRow}>
-          {([['Total Buses',buses.length,'#1d6fce'],['In Service',IS,'#22c55e'],['Out of Service',OOS,'#ef4444'],['Under Repair',InPro,'#f97316'],['Pending',WP,'#3b82f6']] as const).map(([l,v,c])=>(
+          {([
+            ['Total',        buses.length, '#1d6fce'],
+            ['In Service',   IS,           '#22c55e'],
+            ['Out of Svc',   OOS,          '#ef4444'],
+            ['Under Repair', UR,           '#f97316'],
+            ['Pending Parts',PP,           '#eab308'],
+            ['Returned',     RS,           '#06b6d4'],
+          ] as const).map(([l,v,c])=>(
             <View key={String(l)} style={s.statBox}><Text style={s.statLbl}>{l}</Text><Text style={[s.statNum,{color:c}]}>{v}</Text></View>
           ))}
         </View>
@@ -62,7 +82,9 @@ export default function FleetReportPDF({ buses }: { buses: BusRecord[] }) {
             <View key={bus.id} style={[s.tr,i%2===1?{backgroundColor:'#fafafa'}:{}]}>
               <Text style={[s.td,{width:W.id,fontFamily:'Helvetica-Bold'}]}>{bus.bus_id}</Text>
               <View style={{width:W.status,padding:'6 10',justifyContent:'center'}}>
-                <Text style={[s.badge,{backgroundColor:STATUS_BG[bus.bus_status],color:STATUS_COLOR[bus.bus_status]}]}>{STATUS_LABELS[bus.bus_status]}</Text>
+                <Text style={[s.badge,{backgroundColor:STATUS_BG[bus.bus_status]??'#f1f5f9',color:STATUS_COLOR[bus.bus_status]??'#475569'}]}>
+                  {STATUS_LABELS[bus.bus_status]??bus.bus_status}
+                </Text>
               </View>
               <Text style={[s.td,{width:W.system,color:'#475569'}]}>{bus.bus_system??'—'}</Text>
               <Text style={[s.td,{width:W.location,color:'#475569'}]}>{bus.location??'—'}</Text>
@@ -73,7 +95,7 @@ export default function FleetReportPDF({ buses }: { buses: BusRecord[] }) {
           ))}
         </View>
         <View style={s.footer} fixed>
-          <Text style={s.footerT}>FleetOps · {date}</Text>
+          <Text style={s.footerT}>Track-it-Lio · {date}</Text>
           <Text style={s.footerT} render={({pageNumber,totalPages})=>`Page ${pageNumber} of ${totalPages}`}/>
         </View>
       </Page>

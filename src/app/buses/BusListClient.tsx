@@ -7,10 +7,11 @@ import Toast from '@/components/Toast'
 
 const FILTERS = [
   { key:'all', label:'All' },
-  { key:'IS', label:'In Service' },
+  { key:'IS',  label:'In Service' },
   { key:'OOS', label:'Out of Service' },
-  { key:'InPro', label:'Under Repair' },
-  { key:'WP', label:'Pending' },
+  { key:'UR',  label:'Under Repair' },
+  { key:'PP',  label:'Pending Parts' },
+  { key:'RS',  label:'Returned to Service' },
 ]
 
 export default function BusListClient({ buses, initialStatus, initialSearch, userRole }: { buses:BusRecord[]; initialStatus:BusStatus|null; initialSearch:string; userRole:string }) {
@@ -20,7 +21,7 @@ export default function BusListClient({ buses, initialStatus, initialSearch, use
   const [toast, setToast] = useState<string|null>(null)
   const [genPdf, setGenPdf] = useState(false)
   const [sendingEmail, setSendingEmail] = useState(false)
-  const isAdmin = userRole==='Admin'
+  const isAdmin = userRole === 'Admin'
 
   const filtered = useMemo(()=>buses.filter(b=>{
     const ms = filter==='all'||b.bus_status===filter
@@ -31,16 +32,18 @@ export default function BusListClient({ buses, initialStatus, initialSearch, use
   function showToast(msg:string){ setToast(msg); setTimeout(()=>setToast(null),3000) }
 
   function handleCsv() {
-    const headers = ['Bus ID','Status','Bus System','Location','Age','OOS Date','Back In Service Date','Est. Repair Time','Problem Description','Maintenance Comments']
+    const headers = ['Bus ID','Status','Manufacturer','Year','Bus System','Location','OOS Date','Back In Service Date','Est. Repair Time','Labour Cost','Parts Cost','Problem Description','Maintenance Comments']
     const rows = filtered.map(b => [
-      b.bus_id, b.bus_status, b.bus_system??'', b.location??'', b.bus_age??'',
+      b.bus_id, b.bus_status, b.manufacturer??'', b.year_of_manufacture??'',
+      b.bus_system??'', b.location??'',
       b.out_of_service_date??'', b.back_in_service_date??'', b.estimated_repair_time??'',
+      b.labour_cost?.toString()??'', b.parts_cost?.toString()??'',
       (b.problem_description??'').replace(/,/g,' '), (b.maintenance_comments??'').replace(/,/g,' ')
     ])
     const csv = [headers, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n')
     const blob = new Blob([csv], { type:'text/csv' })
     const url = URL.createObjectURL(blob)
-    const a = document.createElement('a'); a.href=url; a.download=`FleetOps_${new Date().toISOString().slice(0,10)}.csv`; a.click()
+    const a = document.createElement('a'); a.href=url; a.download=`TrackitLio_${new Date().toISOString().slice(0,10)}.csv`; a.click()
     URL.revokeObjectURL(url)
     showToast('CSV downloaded')
   }
@@ -52,7 +55,7 @@ export default function BusListClient({ buses, initialStatus, initialSearch, use
       if(!res.ok) throw new Error()
       const blob = await res.blob()
       const url = URL.createObjectURL(blob)
-      const a = document.createElement('a'); a.href=url; a.download=`FleetOps_${new Date().toISOString().slice(0,10)}.pdf`; a.click()
+      const a = document.createElement('a'); a.href=url; a.download=`TrackitLio_${new Date().toISOString().slice(0,10)}.pdf`; a.click()
       URL.revokeObjectURL(url)
       showToast('PDF downloaded')
     } catch { showToast('Error generating PDF') }
@@ -90,7 +93,9 @@ export default function BusListClient({ buses, initialStatus, initialSearch, use
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
             {sendingEmail?'Sending…':'Email Report'}
           </button>
-          <button className="btn btn-primary" onClick={()=>router.push('/buses/new')}>+ Add Bus</button>
+          {isAdmin && (
+            <button className="btn btn-primary" onClick={()=>router.push('/buses/new')}>+ Add Bus</button>
+          )}
         </div>
       </div>
 
@@ -111,15 +116,15 @@ export default function BusListClient({ buses, initialStatus, initialSearch, use
       <div className="table-wrap">
         {filtered.length===0 ? <div className="empty-state"><p>No buses match your filter</p></div> : (
           <table>
-            <thead><tr><th>Bus ID</th><th>Status</th><th>System</th><th>Location</th><th>Age</th><th>OOS Date</th><th></th></tr></thead>
+            <thead><tr><th>Bus ID</th><th>Status</th><th>Manufacturer</th><th>System</th><th>Location</th><th>OOS Date</th><th></th></tr></thead>
             <tbody>
               {filtered.map(bus=>(
                 <tr key={bus.id} style={{ cursor:'pointer' }} onClick={()=>router.push(`/buses/${bus.id}`)}>
                   <td style={{ fontWeight:600, color:'var(--brand)' }}>{bus.bus_id}</td>
                   <td><StatusBadge status={bus.bus_status}/></td>
+                  <td style={{ color:'var(--text-secondary)' }}>{bus.manufacturer??'—'}</td>
                   <td style={{ color:'var(--text-secondary)' }}>{bus.bus_system??'—'}</td>
                   <td style={{ color:'var(--text-secondary)' }}>{bus.location??'—'}</td>
-                  <td style={{ color:'var(--text-secondary)' }}>{bus.bus_age??'—'}</td>
                   <td style={{ color:'var(--text-secondary)' }}>{bus.out_of_service_date ? new Date(bus.out_of_service_date).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '—'}</td>
                   <td onClick={e=>e.stopPropagation()}>
                     <button className="btn btn-secondary" style={{ padding:'4px 10px', fontSize:12 }} onClick={()=>router.push(`/buses/${bus.id}/edit`)}>Edit</button>

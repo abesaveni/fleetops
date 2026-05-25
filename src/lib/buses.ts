@@ -30,8 +30,9 @@ export async function getDashboardCounts(orgId: string) {
     total: buses.length,
     IS:    buses.filter(b => b.bus_status === 'IS').length,
     OOS:   buses.filter(b => b.bus_status === 'OOS').length,
-    InPro: buses.filter(b => b.bus_status === 'InPro').length,
-    WP:    buses.filter(b => b.bus_status === 'WP').length,
+    UR:    buses.filter(b => b.bus_status === 'UR').length,
+    PP:    buses.filter(b => b.bus_status === 'PP').length,
+    RS:    buses.filter(b => b.bus_status === 'RS').length,
   }
 }
 

@@ -7,7 +7,7 @@ import StatusBadge from '@/components/StatusBadge'
 import BusLimitBanner from '@/components/BusLimitBanner'
 
 interface Props {
-  counts:   { total:number; IS:number; OOS:number; InPro:number; WP:number }
+  counts:   { total:number; IS:number; OOS:number; UR:number; PP:number; RS:number }
   buses:    BusRecord[]
   userRole: string
 }
@@ -38,6 +38,11 @@ const IconClock = () => (
     <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
   </svg>
 )
+const IconReturn = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+    <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.49"/>
+  </svg>
+)
 const IconArrow = () => (
   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
     <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
@@ -45,19 +50,21 @@ const IconArrow = () => (
 )
 
 const STAT_CONFIG = [
-  { key:'total', label:'Total Buses',    sub:'Fleet size',        icon: IconBus,    accent:'#3b82f6', bg:'#eff6ff', iconBg:'#dbeafe' },
-  { key:'IS',    label:'In Service',     sub:'Operational',       icon: IconCheck,  accent:'#16a34a', bg:'#f0fdf4', iconBg:'#dcfce7' },
-  { key:'OOS',   label:'Out of Service', sub:'Need attention',    icon: IconAlert,  accent:'#dc2626', bg:'#fef2f2', iconBg:'#fee2e2' },
-  { key:'InPro', label:'Outfitting',      sub:'Commissioning',     icon: IconWrench, accent:'#ea580c', bg:'#fff7ed', iconBg:'#ffedd5' },
-  { key:'WP',    label:'Pending',        sub:'Awaiting sign-off', icon: IconClock,  accent:'#7c3aed', bg:'#f5f3ff', iconBg:'#ede9fe' },
+  { key:'total', label:'Total Buses',           sub:'Fleet size',          icon: IconBus,    accent:'#3b82f6', bg:'#eff6ff', iconBg:'#dbeafe' },
+  { key:'IS',    label:'In Service',            sub:'Operational',         icon: IconCheck,  accent:'#16a34a', bg:'#f0fdf4', iconBg:'#dcfce7' },
+  { key:'OOS',   label:'Out of Service',        sub:'Need attention',      icon: IconAlert,  accent:'#dc2626', bg:'#fef2f2', iconBg:'#fee2e2' },
+  { key:'UR',    label:'Under Repair',          sub:'Active maintenance',  icon: IconWrench, accent:'#ea580c', bg:'#fff7ed', iconBg:'#ffedd5' },
+  { key:'PP',    label:'Pending Parts',         sub:'Waiting for parts',   icon: IconClock,  accent:'#ca8a04', bg:'#fefce8', iconBg:'#fef9c3' },
+  { key:'RS',    label:'Returned to Service',   sub:'Recently restored',   icon: IconReturn, accent:'#0891b2', bg:'#ecfeff', iconBg:'#d0f4f7' },
 ]
 
-const STATUS_COLORS: Record<string,string> = { IS:'#22c55e', OOS:'#ef4444', InPro:'#f97316', WP:'#3b82f6' }
+const STATUS_DOT_COLORS: Record<string,string> = { IS:'#22c55e', OOS:'#ef4444', UR:'#f97316', PP:'#eab308', RS:'#06b6d4' }
 const PIE_DATA = [
-  { key:'IS',    name:'In Service',     color:'#22c55e' },
-  { key:'OOS',   name:'Out of Service', color:'#ef4444' },
-  { key:'InPro', name:'Under Repair',   color:'#f97316' },
-  { key:'WP',    name:'Pending',        color:'#3b82f6' },
+  { key:'IS',  name:'In Service',          color:'#22c55e' },
+  { key:'OOS', name:'Out of Service',      color:'#ef4444' },
+  { key:'UR',  name:'Under Repair',        color:'#f97316' },
+  { key:'PP',  name:'Pending Parts',       color:'#eab308' },
+  { key:'RS',  name:'Returned to Service', color:'#06b6d4' },
 ]
 
 function fmt(d: string|null) {
@@ -75,7 +82,6 @@ function DonutCenter({ viewBox, pct }: { viewBox?: { cx:number; cy:number }; pct
   )
 }
 
-/* Reusable card title style */
 const sectionTitle = { fontSize:13, fontWeight:600, color:'#0f172a', fontFamily:'var(--font-body)' } as const
 const mutedLabel   = { fontSize:11, color:'#94a3b8', fontWeight:400 } as const
 
@@ -85,10 +91,10 @@ export default function DashboardClient({ counts, buses, userRole }: Props) {
   const healthPct = counts.total > 0 ? Math.round((counts.IS / counts.total) * 100) : 0
 
   const pieData = useMemo(() =>
-    PIE_DATA.map(d => ({ ...d, value: counts[d.key as keyof typeof counts] })).filter(d => d.value > 0),
+    PIE_DATA.map(d => ({ ...d, value: counts[d.key as keyof typeof counts] as number })).filter(d => d.value > 0),
     [counts]
   )
-  const attention = useMemo(() => buses.filter(b => b.bus_status !== 'IS').slice(0, 6), [buses])
+  const attention = useMemo(() => buses.filter(b => b.bus_status !== 'IS' && b.bus_status !== 'RS').slice(0, 6), [buses])
   const recent    = useMemo(() => buses.slice(0, 7), [buses])
   const today     = new Date().toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long', year:'numeric' })
 
@@ -120,10 +126,10 @@ export default function DashboardClient({ counts, buses, userRole }: Props) {
         </div>
       </div>
 
-      {/* KPI cards */}
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(5, 1fr)', gap:10 }}>
+      {/* KPI cards — 6 cards */}
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(6, 1fr)', gap:10 }}>
         {STAT_CONFIG.map(({ key, label, sub, icon: Icon, accent, bg, iconBg }) => {
-          const val = counts[key as keyof typeof counts]
+          const val = counts[key as keyof typeof counts] as number
           const pct = counts.total > 0 && key !== 'total' ? Math.round((val / counts.total) * 100) : null
           return (
             <button
@@ -142,9 +148,9 @@ export default function DashboardClient({ counts, buses, userRole }: Props) {
                   <span style={{ fontSize:10, fontWeight:500, color:accent, background:bg, padding:'2px 6px', borderRadius:9999 }}>{pct}%</span>
                 )}
               </div>
-              <div style={{ fontSize:24, fontWeight:700, color:'#0f172a', lineHeight:1, letterSpacing:'-0.03em', marginBottom:4 }}>{val}</div>
-              <div style={{ fontSize:12, fontWeight:500, color:'#334155', marginBottom:1 }}>{label}</div>
-              <div style={{ fontSize:10, color:'#94a3b8', fontWeight:400 }}>{sub}</div>
+              <div style={{ fontSize:22, fontWeight:700, color:'#0f172a', lineHeight:1, letterSpacing:'-0.03em', marginBottom:4 }}>{val}</div>
+              <div style={{ fontSize:11, fontWeight:500, color:'#334155', marginBottom:1 }}>{label}</div>
+              <div style={{ fontSize:9, color:'#94a3b8', fontWeight:400 }}>{sub}</div>
             </button>
           )
         })}
@@ -155,9 +161,7 @@ export default function DashboardClient({ counts, buses, userRole }: Props) {
 
         {/* Donut */}
         <div style={{ background:'#fff', border:'1px solid #e2e8f0', borderRadius:10, padding:'16px 14px', display:'flex', flexDirection:'column' }}>
-          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:4 }}>
-            <span style={sectionTitle}>Fleet Split</span>
-          </div>
+          <span style={sectionTitle}>Fleet Split</span>
           {counts.total === 0 ? (
             <div style={{ padding:'30px 0', fontSize:12, color:'#94a3b8', textAlign:'center' }}>No data</div>
           ) : (
@@ -182,7 +186,7 @@ export default function DashboardClient({ counts, buses, userRole }: Props) {
                   <div key={d.key} style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
                     <div style={{ display:'flex', alignItems:'center', gap:6 }}>
                       <span style={{ width:6, height:6, borderRadius:'50%', background:d.color, display:'inline-block', flexShrink:0 }}/>
-                      <span style={{ fontSize:11, color:'#64748b', fontWeight:400 }}>{d.name}</span>
+                      <span style={{ fontSize:10, color:'#64748b', fontWeight:400 }}>{d.name}</span>
                     </div>
                     <span style={{ fontSize:11, fontWeight:600, color:'#0f172a' }}>{counts[d.key as keyof typeof counts]}</span>
                   </div>
@@ -198,18 +202,19 @@ export default function DashboardClient({ counts, buses, userRole }: Props) {
             <span style={sectionTitle}>Status Breakdown</span>
             <span style={mutedLabel}>{counts.total} buses total</span>
           </div>
-          <div style={{ display:'flex', flexDirection:'column', gap:13 }}>
+          <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
             {[
-              { key:'IS',    label:'In Service',     color:'#22c55e', bg:'#dcfce7', textColor:'#15803d' },
-              { key:'OOS',   label:'Out of Service', color:'#ef4444', bg:'#fee2e2', textColor:'#b91c1c' },
-              { key:'InPro', label:'Outfitting & Commissioning', color:'#f97316', bg:'#ffedd5', textColor:'#c2410c' },
-              { key:'WP',    label:'Pending',        color:'#3b82f6', bg:'#dbeafe', textColor:'#1d4ed8' },
+              { key:'IS',  label:'In Service',          color:'#22c55e', bg:'#dcfce7', textColor:'#15803d' },
+              { key:'OOS', label:'Out of Service',      color:'#ef4444', bg:'#fee2e2', textColor:'#b91c1c' },
+              { key:'UR',  label:'Under Repair',        color:'#f97316', bg:'#ffedd5', textColor:'#c2410c' },
+              { key:'PP',  label:'Pending Parts',       color:'#eab308', bg:'#fef9c3', textColor:'#854d0e' },
+              { key:'RS',  label:'Returned to Service', color:'#06b6d4', bg:'#d0f4f7', textColor:'#0e7490' },
             ].map(({ key, label, color, bg, textColor }) => {
-              const val = counts[key as keyof typeof counts]
+              const val = counts[key as keyof typeof counts] as number
               const pct = counts.total > 0 ? (val / counts.total) * 100 : 0
               return (
                 <div key={key}>
-                  <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:5 }}>
+                  <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:4 }}>
                     <div style={{ display:'flex', alignItems:'center', gap:6 }}>
                       <span style={{ width:6, height:6, borderRadius:'50%', background:color, flexShrink:0, display:'inline-block' }}/>
                       <span style={{ fontSize:12, fontWeight:400, color:'#334155' }}>{label}</span>
@@ -226,7 +231,7 @@ export default function DashboardClient({ counts, buses, userRole }: Props) {
               )
             })}
           </div>
-          <div style={{ marginTop:18, paddingTop:14, borderTop:'1px solid #f1f5f9', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+          <div style={{ marginTop:16, paddingTop:12, borderTop:'1px solid #f1f5f9', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
             <div>
               <div style={{ fontSize:10, color:'#94a3b8', textTransform:'uppercase', letterSpacing:'0.07em', fontWeight:500, marginBottom:3 }}>Fleet Health Score</div>
               <div style={{ fontSize:18, fontWeight:700, color: healthPct >= 70 ? '#15803d' : healthPct >= 50 ? '#c2410c' : '#b91c1c', letterSpacing:'-0.02em' }}>
@@ -250,7 +255,7 @@ export default function DashboardClient({ counts, buses, userRole }: Props) {
           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:12 }}>
             <span style={sectionTitle}>Needs Attention</span>
             <span style={{ fontSize:10, background:'#fee2e2', color:'#b91c1c', padding:'2px 8px', borderRadius:9999, fontWeight:500 }}>
-              {counts.OOS + counts.InPro + counts.WP} buses
+              {counts.OOS + counts.UR + counts.PP} buses
             </span>
           </div>
           {attention.length === 0 ? (
@@ -263,16 +268,10 @@ export default function DashboardClient({ counts, buses, userRole }: Props) {
           ) : (
             <div style={{ display:'flex', flexDirection:'column', gap:5, flex:1, overflowY:'auto' }}>
               {attention.map(bus => {
-                const color = STATUS_COLORS[bus.bus_status] ?? '#94a3b8'
-                const bgMap: Record<string,string> = { OOS:'#fff5f5', InPro:'#fff8f0', WP:'#f5f8ff' }
+                const color = STATUS_DOT_COLORS[bus.bus_status] ?? '#94a3b8'
+                const bgMap: Record<string,string> = { OOS:'#fff5f5', UR:'#fff8f0', PP:'#fefce8' }
                 return (
-                  <button
-                    key={bus.id}
-                    onClick={() => router.push(`/buses/${bus.id}`)}
-                    style={{ display:'flex', alignItems:'center', gap:10, padding:'8px 10px', borderRadius:8, background:bgMap[bus.bus_status]??'#f8fafc', border:`1px solid ${color}18`, cursor:'pointer', fontFamily:'var(--font-body)', textAlign:'left', transition:'background 0.1s', width:'100%' }}
-                    onMouseEnter={e => { e.currentTarget.style.background = bgMap[bus.bus_status] ?? '#f1f5f9' }}
-                    onMouseLeave={e => { e.currentTarget.style.background = bgMap[bus.bus_status] ?? '#f8fafc' }}
-                  >
+                  <button key={bus.id} onClick={() => router.push(`/buses/${bus.id}`)} style={{ display:'flex', alignItems:'center', gap:10, padding:'8px 10px', borderRadius:8, background:bgMap[bus.bus_status]??'#f8fafc', border:`1px solid ${color}18`, cursor:'pointer', fontFamily:'var(--font-body)', textAlign:'left', width:'100%' }}>
                     <span style={{ width:7, height:7, borderRadius:'50%', background:color, flexShrink:0, display:'inline-block' }}/>
                     <div style={{ flex:1, minWidth:0 }}>
                       <div style={{ fontWeight:600, fontSize:12, color:'#0f172a' }}>{bus.bus_id}</div>
@@ -311,20 +310,14 @@ export default function DashboardClient({ counts, buses, userRole }: Props) {
           <table style={{ width:'100%', borderCollapse:'collapse' }}>
             <thead>
               <tr style={{ background:'#f8fafc' }}>
-                {['Bus ID','Status','System','Location','OOS Date','BIS Date'].map(h => (
+                {['Bus ID','Status','Manufacturer','System','Location','OOS Date','BIS Date'].map(h => (
                   <th key={h} style={{ padding:'8px 16px', textAlign:'left', fontSize:10, fontWeight:500, color:'#94a3b8', textTransform:'uppercase', letterSpacing:'0.07em', borderBottom:'1px solid #f1f5f9', whiteSpace:'nowrap' }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {recent.map((bus, i) => (
-                <tr
-                  key={bus.id}
-                  onClick={() => router.push(`/buses/${bus.id}`)}
-                  style={{ cursor:'pointer', transition:'background 0.1s', borderBottom: i < recent.length-1 ? '1px solid #f8fafc' : 'none' }}
-                  onMouseEnter={e => (e.currentTarget.style.background = '#f8fafc')}
-                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-                >
+                <tr key={bus.id} onClick={() => router.push(`/buses/${bus.id}`)} style={{ cursor:'pointer', transition:'background 0.1s', borderBottom: i < recent.length-1 ? '1px solid #f8fafc' : 'none' }} onMouseEnter={e => (e.currentTarget.style.background = '#f8fafc')} onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
                   <td style={{ padding:'10px 16px' }}>
                     <div style={{ display:'flex', alignItems:'center', gap:8 }}>
                       <div style={{ width:24, height:24, borderRadius:6, background:'#eff6ff', display:'flex', alignItems:'center', justifyContent:'center' }}>
@@ -334,6 +327,7 @@ export default function DashboardClient({ counts, buses, userRole }: Props) {
                     </div>
                   </td>
                   <td style={{ padding:'10px 16px' }}><StatusBadge status={bus.bus_status}/></td>
+                  <td style={{ padding:'10px 16px', fontSize:12, color:'#475569', fontWeight:400 }}>{bus.manufacturer ?? '—'}</td>
                   <td style={{ padding:'10px 16px', fontSize:12, color:'#475569', fontWeight:400 }}>{bus.bus_system ?? '—'}</td>
                   <td style={{ padding:'10px 16px', fontSize:12, color:'#475569', fontWeight:400 }}>{bus.location ?? '—'}</td>
                   <td style={{ padding:'10px 16px', fontSize:11, color:'#94a3b8', fontWeight:400 }}>{fmt(bus.out_of_service_date)}</td>

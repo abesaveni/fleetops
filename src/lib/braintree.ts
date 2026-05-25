@@ -20,19 +20,14 @@ export function getGateway(): braintree.BraintreeGateway {
 
 // Plan definitions — bus_limit kept in sync with organizations.bus_limit
 export const PLANS: Record<string, { name: string; price: number; bus_limit: number | null }> = {
-  pro: {
-    name:      'Pro',
-    price:     49,
+  plan1: {
+    name:      'Plan 1',
+    price:     149,
     bus_limit: 50,
   },
-  business: {
-    name:      'Business',
-    price:     149,
+  plan2: {
+    name:      'Plan 2',
+    price:     499,
     bus_limit: 250,
-  },
-  enterprise: {
-    name:      'Enterprise',
-    price:     0,
-    bus_limit: null,
   },
 }

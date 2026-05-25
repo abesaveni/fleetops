@@ -115,7 +115,7 @@ export default function SignupPage() {
                 <path d="M4 7V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2" stroke="#60a5fa" strokeWidth="1.6"/>
               </svg>
             </div>
-            <span style={{ fontSize: 18, fontWeight: 700, color: '#fff', letterSpacing: '-0.02em' }}>FleetOps</span>
+            <span style={{ fontSize: 18, fontWeight: 700, color: '#fff', letterSpacing: '-0.02em' }}>Track-it-Lio</span>
           </div>
           <h2 style={{ fontSize: 30, fontWeight: 800, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.2, margin: '0 0 16px' }}>
             Modern fleet management for U.S. transit agencies
@@ -150,7 +150,7 @@ export default function SignupPage() {
                 <path d="M4 7V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2" stroke="#fff" strokeWidth="1.6"/>
               </svg>
             </div>
-            <span style={{ fontSize: 19, fontWeight: 700, color: '#0f172a', letterSpacing: '-0.02em' }}>FleetOps</span>
+            <span style={{ fontSize: 19, fontWeight: 700, color: '#0f172a', letterSpacing: '-0.02em' }}>Track-it-Lio</span>
           </div>
 
           {/* Step indicator */}
@@ -188,7 +188,7 @@ export default function SignupPage() {
                 </div>
                 <h2 style={{ fontSize: 22, fontWeight: 800, color: '#0f172a', margin: '0 0 8px', letterSpacing: '-0.02em' }}>You're all set!</h2>
                 <p style={{ fontSize: 14.5, color: '#64748b', margin: '0 0 20px', lineHeight: 1.6 }}>
-                  Your FleetOps account and organization are ready.<br/>Taking you to your dashboard…
+                  Your Track-it-Lio account and organization are ready.<br/>Taking you to your dashboard…
                 </p>
                 <div style={{ display: 'flex', gap: 6, justifyContent: 'center' }}>
                   <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#2563eb', animation: 'pulse 1s infinite' }}/>

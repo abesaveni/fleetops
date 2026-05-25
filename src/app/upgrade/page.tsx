@@ -7,78 +7,42 @@ import PaymentModal from '@/components/PaymentModal'
 
 const PLANS = [
   {
-    id:       'starter',
-    name:     'Starter',
-    tag:      null,
-    desc:     'Perfect for getting started',
-    monthly:  0,
-    yearly:   0,
-    limit:    5,
-    limitLabel: '5 buses included',
-    cta:      'Current Plan',
-    ctaStyle: 'secondary',
-    features: [
-      'Up to 5 buses',
-      'Real-time fleet status board',
-      'PDF & CSV fleet reports',
-      'Up to 2 team members',
-      'Email support',
-    ],
-  },
-  {
-    id:       'pro',
-    name:     'Pro',
+    id:       'plan1',
+    name:     'Plan 1',
     tag:      'Most Popular',
     desc:     'For growing transit operations',
-    monthly:  49,
-    yearly:   499,
+    monthly:  149,
+    yearly:   1499,
     limit:    50,
     limitLabel: 'Up to 50 buses',
-    cta:      'Upgrade to Pro',
+    cta:      'Upgrade to Plan 1',
     ctaStyle: 'primary',
     features: [
       'Up to 50 buses',
-      'Everything in Starter',
-      'Unlimited team members',
-      'Maintenance tracking & comments',
-      'Priority email support',
+      'Real-time fleet status board',
+      'PDF & CSV fleet reports',
+      'Work order management',
+      'Dispatch & Maintenance roles',
+      'Priority support',
     ],
   },
   {
-    id:       'business',
-    name:     'Business',
+    id:       'plan2',
+    name:     'Plan 2',
     tag:      null,
-    desc:     'For city-wide fleet operators',
-    monthly:  149,
-    yearly:   1499,
+    desc:     'For large fleet operators',
+    monthly:  499,
+    yearly:   4999,
     limit:    250,
     limitLabel: 'Up to 250 buses',
-    cta:      'Upgrade to Business',
+    cta:      'Upgrade to Plan 2',
     ctaStyle: 'outline',
     features: [
       'Up to 250 buses',
-      'Everything in Pro',
+      'Everything in Plan 1',
       'Advanced fleet analytics',
-      'API access & webhooks',
+      'E1 Accounting API integration',
       'Dedicated account manager',
-    ],
-  },
-  {
-    id:       'enterprise',
-    name:     'Enterprise',
-    tag:      null,
-    desc:     'Unlimited scale, custom SLAs',
-    monthly:  null,
-    yearly:   null,
-    limit:    null,
-    limitLabel: 'Unlimited buses',
-    cta:      'Contact Sales',
-    ctaStyle: 'outline',
-    features: [
-      'Unlimited buses & depots',
-      'Everything in Business',
-      'On-premise deployment option',
-      'Custom integrations & API',
       '24/7 phone + SLA guarantee',
     ],
   },
@@ -91,7 +55,7 @@ const Check = () => (
 )
 
 interface ModalState {
-  planId:        'pro' | 'business'
+  planId:        'plan1' | 'plan2'
   planName:      string
   price:         number
   billingPeriod: 'monthly' | 'yearly'
@@ -109,13 +73,8 @@ export default function UpgradePage() {
   const atLimit     = busLimit !== null && busCount >= busLimit
 
   function handleUpgrade(planId: string, planName: string, monthly: number, annualTotal: number) {
-    if (planId === 'starter') return
-    if (planId === 'enterprise') {
-      window.location.href = 'mailto:sales@fleetops.io?subject=Enterprise Plan Inquiry'
-      return
-    }
     setModal({
-      planId:        planId as 'pro' | 'business',
+      planId:        planId as 'plan1' | 'plan2',
       planName,
       price:         yearly ? annualTotal : monthly,
       billingPeriod: yearly ? 'yearly' : 'monthly',
@@ -150,10 +109,10 @@ export default function UpgradePage() {
             </div>
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>
-                You've reached your free limit of {busLimit} buses.
+                You've reached your bus limit of {busLimit} buses.
               </div>
               <div style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.75)', marginTop: 2 }}>
-                Upgrade to keep growing your fleet — plans start at $49/month.
+                Upgrade to keep growing your fleet.
               </div>
             </div>
             <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', fontWeight: 600, whiteSpace: 'nowrap' }}>
@@ -171,7 +130,7 @@ export default function UpgradePage() {
             Scale your fleet,<br/>not your overhead.
           </h1>
           <p style={{ fontSize: 15, color: '#64748b', margin: '0 0 24px', lineHeight: 1.6 }}>
-            Start free with 5 buses. Upgrade anytime to add more vehicles and unlock<br/>powerful operations tools. Prices in USD.
+            Choose the plan that fits your fleet size. Prices in USD.
           </p>
 
           {/* Monthly / Yearly toggle */}
@@ -185,15 +144,15 @@ export default function UpgradePage() {
               onClick={() => setYearly(true)}
               style={{ padding: '7px 20px', borderRadius: 7, border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6, background: yearly ? '#fff' : 'transparent', color: yearly ? '#0f172a' : '#64748b', boxShadow: yearly ? '0 1px 4px rgba(0,0,0,0.1)' : 'none', transition: 'all 0.15s' }}>
               Yearly
-              <span style={{ fontSize: 10, fontWeight: 700, background: '#dcfce7', color: '#15803d', padding: '1px 7px', borderRadius: 20 }}>Save 15%</span>
+              <span style={{ fontSize: 10, fontWeight: 700, background: '#dcfce7', color: '#15803d', padding: '1px 7px', borderRadius: 20 }}>Save ~16%</span>
             </button>
           </div>
         </div>
 
         {/* Plan cards */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, maxWidth: 1060, margin: '0 auto' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 20, maxWidth: 720, margin: '0 auto' }}>
           {PLANS.map(plan => {
-            const isCurrent  = currentPlan === plan.id || (currentPlan === 'trial' && plan.id === 'starter')
+            const isCurrent  = currentPlan === plan.id
             const isPopular  = plan.tag === 'Most Popular'
             const price      = yearly ? plan.yearly : plan.monthly
             return (
@@ -201,13 +160,12 @@ export default function UpgradePage() {
                 background: isPopular ? '#0f172a' : '#fff',
                 border: `1.5px solid ${isPopular ? '#2563eb' : '#e2e8f0'}`,
                 borderRadius: 14,
-                padding: '24px 20px',
+                padding: '28px 24px',
                 display: 'flex',
                 flexDirection: 'column',
                 position: 'relative',
                 boxShadow: isPopular ? '0 8px 32px rgba(37,99,235,0.2)' : '0 1px 4px rgba(0,0,0,0.04)',
               }}>
-                {/* Tag */}
                 {plan.tag && (
                   <div style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', background: '#2563eb', color: '#fff', fontSize: 10, fontWeight: 700, padding: '3px 12px', borderRadius: 20, whiteSpace: 'nowrap', letterSpacing: '0.06em' }}>
                     {plan.tag}
@@ -219,69 +177,53 @@ export default function UpgradePage() {
                   </div>
                 )}
 
-                {/* Plan name + desc */}
                 <div style={{ marginBottom: 16 }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: isPopular ? '#93c5fd' : '#2563eb', marginBottom: 4, letterSpacing: '0.04em', textTransform: 'uppercase' }}>{plan.name}</div>
-                  <div style={{ fontSize: 12, color: isPopular ? '#94a3b8' : '#64748b' }}>{plan.desc}</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: isPopular ? '#93c5fd' : '#2563eb', marginBottom: 4, letterSpacing: '0.04em', textTransform: 'uppercase' }}>{plan.name}</div>
+                  <div style={{ fontSize: 13, color: isPopular ? '#94a3b8' : '#64748b' }}>{plan.desc}</div>
                 </div>
 
-                {/* Price */}
                 <div style={{ marginBottom: 16 }}>
-                  {price === null ? (
-                    <div style={{ fontSize: 32, fontWeight: 800, color: isPopular ? '#fff' : '#0f172a', letterSpacing: '-0.03em' }}>Custom</div>
-                  ) : price === 0 ? (
-                    <div>
-                      <span style={{ fontSize: 32, fontWeight: 800, color: isPopular ? '#fff' : '#0f172a', letterSpacing: '-0.03em' }}>Free</span>
-                      <span style={{ fontSize: 12, color: isPopular ? '#64748b' : '#94a3b8', marginLeft: 4 }}>no card required</span>
-                    </div>
-                  ) : (
-                    <div>
-                      <span style={{ fontSize: 32, fontWeight: 800, color: isPopular ? '#fff' : '#0f172a', letterSpacing: '-0.03em' }}>${price}</span>
-                      <span style={{ fontSize: 12, color: isPopular ? '#64748b' : '#94a3b8', marginLeft: 4 }}>/{yearly ? 'year' : 'month'}</span>
-                    </div>
-                  )}
-                  {yearly && price !== null && price > 0 && (
+                  <div>
+                    <span style={{ fontSize: 38, fontWeight: 800, color: isPopular ? '#fff' : '#0f172a', letterSpacing: '-0.03em' }}>${price}</span>
+                    <span style={{ fontSize: 13, color: isPopular ? '#64748b' : '#94a3b8', marginLeft: 4 }}>/{yearly ? 'year' : 'month'}</span>
+                  </div>
+                  {yearly && (
                     <div style={{ fontSize: 11, color: '#16a34a', fontWeight: 600, marginTop: 2 }}>
-                      ${Math.round(price / 12)}/mo · save 15%
+                      ${Math.round(price / 12)}/mo · save ~16%
                     </div>
                   )}
                 </div>
 
-                {/* Bus limit pill */}
-                <div style={{ background: isPopular ? 'rgba(255,255,255,0.08)' : '#f1f5f9', border: `1px solid ${isPopular ? 'rgba(255,255,255,0.1)' : '#e2e8f0'}`, borderRadius: 8, padding: '8px 12px', marginBottom: 18, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ background: isPopular ? 'rgba(255,255,255,0.08)' : '#f1f5f9', border: `1px solid ${isPopular ? 'rgba(255,255,255,0.1)' : '#e2e8f0'}`, borderRadius: 8, padding: '8px 12px', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 8 }}>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={isPopular ? '#60a5fa' : '#2563eb'} strokeWidth="1.8" strokeLinecap="round">
                     <rect x="1" y="7" width="22" height="13" rx="2"/><circle cx="6" cy="20" r="2"/><circle cx="18" cy="20" r="2"/>
                     <path d="M4 7V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2"/>
                   </svg>
-                  <span style={{ fontSize: 12, fontWeight: 600, color: isPopular ? '#e2e8f0' : '#0f172a' }}>{plan.limitLabel}</span>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: isPopular ? '#e2e8f0' : '#0f172a' }}>{plan.limitLabel}</span>
                 </div>
 
-                {/* Features */}
-                <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 20px', display: 'flex', flexDirection: 'column', gap: 9, flex: 1 }}>
+                <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 24px', display: 'flex', flexDirection: 'column', gap: 10, flex: 1 }}>
                   {plan.features.map((f, i) => (
-                    <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 12.5, color: isPopular ? '#cbd5e1' : '#475569', lineHeight: 1.4 }}>
+                    <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 13, color: isPopular ? '#cbd5e1' : '#475569', lineHeight: 1.4 }}>
                       <Check/>
                       {f}
                     </li>
                   ))}
                 </ul>
 
-                {/* CTA */}
                 <button
-                  onClick={() => handleUpgrade(plan.id, plan.name, plan.monthly ?? 0, plan.yearly ?? 0)}
+                  onClick={() => handleUpgrade(plan.id, plan.name, plan.monthly, plan.yearly)}
                   disabled={isCurrent}
                   style={{
-                    width: '100%', padding: '11px', border: 'none', borderRadius: 8,
-                    fontSize: 13, fontWeight: 700, cursor: isCurrent ? 'default' : 'pointer',
+                    width: '100%', padding: '12px', border: 'none', borderRadius: 8,
+                    fontSize: 14, fontWeight: 700, cursor: isCurrent ? 'default' : 'pointer',
                     fontFamily: 'inherit', transition: 'all 0.15s',
                     background: isCurrent
                       ? (isPopular ? 'rgba(255,255,255,0.08)' : '#f1f5f9')
-                      : isPopular
-                        ? '#2563eb'
-                        : plan.ctaStyle === 'primary' ? '#2563eb' : '#f1f5f9',
+                      : isPopular ? '#2563eb' : '#f1f5f9',
                     color: isCurrent
                       ? (isPopular ? '#64748b' : '#94a3b8')
-                      : isPopular || plan.ctaStyle === 'primary' ? '#fff' : '#0f172a',
+                      : isPopular ? '#fff' : '#0f172a',
                     opacity: isCurrent ? 0.7 : 1,
                   }}>
                   {isCurrent ? 'Current Plan' : plan.cta}
@@ -291,9 +233,8 @@ export default function UpgradePage() {
           })}
         </div>
 
-        {/* Footer note */}
         <p style={{ textAlign: 'center', fontSize: 12, color: '#94a3b8', marginTop: 28 }}>
-          All plans include fleet status tracking · Unlimited drivers · Cancel anytime · Prices in USD
+          All plans include fleet status tracking · Work order management · Cancel anytime · Prices in USD
         </p>
       </main>
     </div>

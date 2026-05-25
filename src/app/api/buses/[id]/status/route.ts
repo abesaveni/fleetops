@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerComponentClient, createAdminClient } from '@/lib/supabase-server'
 import type { BusStatus } from '@/types'
 
-const VALID_STATUSES: BusStatus[] = ['IS', 'OOS', 'InPro', 'WP']
+const VALID_STATUSES: BusStatus[] = ['IS', 'OOS', 'UR', 'PP', 'RS']
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   const supabase = createServerComponentClient()

@@ -26,7 +26,7 @@ export default async function EditBusPage({ params }: { params: { id: string } }
               <p className="page-subtitle">{bus.bus_id}</p>
             </div>
           </div>
-          <BusForm bus={bus} mode="edit"/>
+          <BusForm bus={bus} mode="edit" userRole={sub.subscription_type}/>
         </div>
       </main>
     </div>

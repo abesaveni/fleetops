@@ -48,7 +48,7 @@ export default function SuperAdminSidebar() {
             <StarIcon/>
           </div>
           <div>
-            <h1>FleetOps</h1>
+            <h1>Track-it-Lio</h1>
             <p>Super Admin</p>
           </div>
         </div>

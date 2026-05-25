@@ -33,7 +33,7 @@ export default async function NewBusPage() {
               <p className="page-subtitle">Fill in the bus details below</p>
             </div>
           </div>
-          <BusForm mode="new"/>
+          <BusForm mode="new" userRole={sub.subscription_type}/>
         </div>
       </main>
     </div>

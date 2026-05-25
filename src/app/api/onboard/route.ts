@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
       owner_email: email.toLowerCase(),
       plan:        'trial',
       status:      'trial',
-      bus_limit:   5,          // 5 buses free on Starter plan
+      bus_limit:   10,
       notes:       notes || null,
     })
     .select()

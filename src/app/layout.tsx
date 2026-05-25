@@ -3,8 +3,8 @@ import './globals.css'
 import { UserProvider } from '@/context/UserContext'
 
 export const metadata: Metadata = {
-  title: 'FleetOps — Bus Fleet Management',
-  description: 'Real-time fleet status, maintenance tracking and reporting',
+  title: 'Track-it-Lio — Fleet Management',
+  description: 'Real-time fleet status, work order tracking and reporting',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

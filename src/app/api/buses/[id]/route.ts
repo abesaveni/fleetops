@@ -33,7 +33,10 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   const { data, error } = await admin
     .from('bus_records')
     .update({
+      bus_id:                body.bus_id               || undefined,
       bus_status:            body.bus_status,
+      manufacturer:          body.manufacturer          ?? null,
+      year_of_manufacture:   body.year_of_manufacture   || null,
       bus_system:            body.bus_system            || null,
       location:              body.location              || null,
       bus_age:               body.bus_age               || null,
@@ -42,6 +45,8 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       estimated_repair_time: body.estimated_repair_time || null,
       problem_description:   body.problem_description   || null,
       maintenance_comments:  body.maintenance_comments  || null,
+      labour_cost:           body.labour_cost           ?? null,
+      parts_cost:            body.parts_cost            ?? null,
     })
     .eq('id', params.id)
     .eq('org_id', sub.org_id)

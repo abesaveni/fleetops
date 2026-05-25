@@ -82,7 +82,6 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
   // ── Work Order: auto-create when Dispatch sets Date Out of Service ──────
   if (settingOOS) {
-    // Only create if no open work order already exists for this bus
     const { data: existingWO } = await admin
       .from('work_orders')
       .select('id')
@@ -92,14 +91,19 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
     if (!existingWO) {
       await admin.from('work_orders').insert({
-        org_id:              sub.org_id,
-        bus_record_id:       params.id,
-        wo_number:           makeWONumber(),
-        status:              'open',
-        date_out_of_service: body.out_of_service_date,
-        problem_description: body.problem_description || null,
-        asset_location:      body.location            || null,
-        created_by:          session.user.email,
+        org_id:                sub.org_id,
+        bus_record_id:         params.id,
+        wo_number:             makeWONumber(),
+        status:                'open',
+        date_out_of_service:   body.out_of_service_date,
+        problem_description:   body.problem_description   || null,
+        asset_location:        body.location              || null,
+        bus_system:            body.bus_system            || null,
+        estimated_repair_time: body.estimated_repair_time || null,
+        labour_cost:           body.labour_cost           ?? null,
+        parts_cost:            body.parts_cost            ?? null,
+        maintenance_comments:  body.maintenance_comments  || null,
+        created_by:            session.user.email,
       })
     }
   }
@@ -126,6 +130,33 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
         parts_cost:            body.parts_cost            ?? null,
         closed_at:             new Date().toISOString(),
       }).eq('id', openWO.id)
+    }
+  }
+
+  // ── Work Order: sync maintenance fields to open WO on every save ─────────
+  // Handles the case where Maintenance updates fields without setting BIS date yet
+  if (!settingOOS && !settingBIS) {
+    const { data: openWO } = await admin
+      .from('work_orders')
+      .select('id')
+      .eq('bus_record_id', params.id)
+      .in('status', ['open', 'under_repair', 'pending_parts'])
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    if (openWO) {
+      const sync: Record<string, unknown> = {}
+      if (body.bus_system            != null) sync.bus_system            = body.bus_system            || null
+      if (body.estimated_repair_time != null) sync.estimated_repair_time = body.estimated_repair_time || null
+      if (body.labour_cost           != null) sync.labour_cost           = body.labour_cost
+      if (body.parts_cost            != null) sync.parts_cost            = body.parts_cost
+      if (body.maintenance_comments  != null) sync.maintenance_comments  = body.maintenance_comments  || null
+      if (body.location              != null) sync.asset_location        = body.location              || null
+      if (body.problem_description   != null) sync.problem_description   = body.problem_description   || null
+      if (Object.keys(sync).length > 0) {
+        await admin.from('work_orders').update(sync).eq('id', openWO.id)
+      }
     }
   }
 

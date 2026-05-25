@@ -75,17 +75,24 @@ export async function POST(req: NextRequest) {
 
   // Auto-create work order if bus is being added as already out of service
   if (body.out_of_service_date && data) {
-    const date  = new Date().toISOString().slice(0, 10).replace(/-/g, '')
-    const rand  = Math.floor(1000 + Math.random() * 9000)
+    const date = new Date().toISOString().slice(0, 10).replace(/-/g, '')
+    const rand = Math.floor(1000 + Math.random() * 9000)
     await admin.from('work_orders').insert({
-      org_id:              sub.org_id,
-      bus_record_id:       data.id,
-      wo_number:           `WO-${date}-${rand}`,
-      status:              'open',
-      date_out_of_service: body.out_of_service_date,
-      problem_description: body.problem_description || null,
-      asset_location:      body.location            || null,
-      created_by:          session.user.email,
+      org_id:                sub.org_id,
+      bus_record_id:         data.id,
+      wo_number:             `WO-${date}-${rand}`,
+      status:                body.back_in_service_date ? 'returned_to_service' : 'open',
+      date_out_of_service:   body.out_of_service_date,
+      back_in_service_date:  body.back_in_service_date  || null,
+      problem_description:   body.problem_description   || null,
+      asset_location:        body.location              || null,
+      bus_system:            body.bus_system            || null,
+      estimated_repair_time: body.estimated_repair_time || null,
+      labour_cost:           body.labour_cost           ?? null,
+      parts_cost:            body.parts_cost            ?? null,
+      maintenance_comments:  body.maintenance_comments  || null,
+      created_by:            session.user.email,
+      closed_at:             body.back_in_service_date ? new Date().toISOString() : null,
     })
   }
 

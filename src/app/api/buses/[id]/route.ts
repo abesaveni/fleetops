@@ -51,8 +51,8 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   // BIS triggers any time the date is provided — close block is idempotent (finds open WO or skips)
   const settingBIS = !!body.back_in_service_date
 
-  // Workflow-driven status — override whatever the form sent
-  let bus_status = body.bus_status ?? currentBus.bus_status
+  // Workflow-driven status — BIS always wins; OOS on first report; otherwise use maintenance's manual selection
+  let bus_status = (body.bus_status as string) || currentBus.bus_status
   if (settingOOS && !settingBIS) bus_status = 'OOS'
   if (settingBIS) bus_status = 'RS'
 

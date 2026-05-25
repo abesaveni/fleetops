@@ -36,6 +36,7 @@ type FormState = {
   maintenance_comments:  string
   labour_cost:           string
   parts_cost:            string
+  bus_status:            string
 }
 
 function SectionHeader({ title, subtitle, color }: { title: string; subtitle: string; color: string }) {
@@ -67,6 +68,7 @@ export default function BusForm({ bus, mode, userRole }: { bus?: BusRecord; mode
     maintenance_comments:  bus?.maintenance_comments  ?? '',
     labour_cost:           bus?.labour_cost?.toString()  ?? '0.00',
     parts_cost:            bus?.parts_cost?.toString()   ?? '0.00',
+    bus_status:            bus?.bus_status             ?? '',
   })
 
   const role = userRole ?? 'Admin'
@@ -206,6 +208,32 @@ export default function BusForm({ bus, mode, userRole }: { bus?: BusRecord; mode
       <div className="card" style={{ marginBottom: 16 }}>
         <SectionHeader title="Maintenance / Work Order" subtitle="Maintenance — complete repair details to close work order" color="#f97316"/>
         <div className="form-grid">
+          {/* Repair Status — Maintenance can set OOS / Under Repair / Pending Parts.
+              In Service and Returned to Service are set automatically by the workflow. */}
+          <div className="form-group">
+            <label className="form-label">
+              Repair Status
+              {isMaintenance && !form.back_in_service_date && (
+                <span style={{ fontSize: 11, fontWeight: 500, color: '#f97316', marginLeft: 6 }}>manually update</span>
+              )}
+              {form.back_in_service_date && (
+                <span style={{ fontSize: 11, fontWeight: 500, color: '#16a34a', marginLeft: 6 }}>auto → Returned to Service</span>
+              )}
+            </label>
+            <select
+              className={inputClass}
+              value={form.back_in_service_date ? 'RS' : (form.bus_status || '')}
+              onChange={e => set('bus_status', e.target.value)}
+              disabled={!isMaintenance || !!form.back_in_service_date}
+              style={(!isMaintenance || !!form.back_in_service_date) ? disabledStyle : undefined}
+            >
+              <option value="">Select status…</option>
+              <option value="OOS">Out of Service</option>
+              <option value="UR">Under Repair</option>
+              <option value="PP">Pending Parts</option>
+              {form.back_in_service_date && <option value="RS">Returned to Service</option>}
+            </select>
+          </div>
           <div className="form-group">
             <label className="form-label">Bus System</label>
             <select
@@ -292,9 +320,15 @@ export default function BusForm({ bus, mode, userRole }: { bus?: BusRecord; mode
         </div>
 
         {isMaintenance && (
-          <div style={{ marginTop: 12, padding: '10px 14px', background: '#fff7ed', borderRadius: 8, border: '1px solid #fed7aa', fontSize: 12.5, color: '#9a3412' }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{ display: 'inline', marginRight: 6 }}><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            Setting a <strong>Back in Service Date</strong> will automatically close the open Work Order and change the bus status to <strong>Returned to Service</strong>.
+          <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ padding: '10px 14px', background: '#fff7ed', borderRadius: 8, border: '1px solid #fed7aa', fontSize: 12.5, color: '#9a3412' }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{ display: 'inline', marginRight: 6 }}><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              Use <strong>Repair Status</strong> to update progress: <strong>Out of Service → Under Repair → Pending Parts</strong>.
+            </div>
+            <div style={{ padding: '10px 14px', background: '#f0fdf4', borderRadius: 8, border: '1px solid #bbf7d0', fontSize: 12.5, color: '#15803d' }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{ display: 'inline', marginRight: 6 }}><polyline points="20 6 9 17 4 12"/></svg>
+              Setting a <strong>Back in Service Date</strong> will automatically close the Work Order and change bus status to <strong>Returned to Service</strong>.
+            </div>
           </div>
         )}
       </div>

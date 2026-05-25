@@ -10,51 +10,85 @@ export default async function Home() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#fff', fontFamily: "'DM Sans', sans-serif" }}>
+      <style>{`
+        .lp-nav-inner { max-width:1200px; margin:0 auto; padding:0 32px; height:68px; display:flex; align-items:center; justify-content:space-between; }
+        .lp-hero { padding:96px 32px 88px; }
+        .lp-hero-h1 { font-size:62px; font-weight:900; color:#0f172a; letter-spacing:-0.045em; line-height:1.06; margin:0 0 24px; }
+        .lp-hero-p { font-size:20px; color:#475569; line-height:1.65; margin:0 0 44px; max-width:580px; margin-left:auto; margin-right:auto; }
+        .lp-section-h2 { font-size:40px; font-weight:900; color:#0f172a; letter-spacing:-0.04em; margin:0 0 14px; }
+        .lp-cta-h2 { font-size:44px; font-weight:900; color:#fff; letter-spacing:-0.04em; margin:0 0 16px; line-height:1.1; }
+        .lp-grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:28px; }
+        .lp-grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:0; text-align:center; }
+        .lp-grid-steps { display:grid; grid-template-columns:repeat(3,1fr); gap:40px; position:relative; }
+        .lp-features-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:20px; }
+        .lp-roles-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:20px; }
+        .lp-section-pad { padding:88px 32px; }
+        .lp-section-pad-md { padding:80px 32px; }
+        .lp-signin-link { display:inline; }
+        @media (max-width:640px) {
+          .lp-nav-inner { padding:0 16px; height:60px; }
+          .lp-hero { padding:52px 20px 48px; }
+          .lp-hero-h1 { font-size:36px; }
+          .lp-hero-p { font-size:16px; margin-bottom:28px; }
+          .lp-section-h2 { font-size:26px; }
+          .lp-cta-h2 { font-size:28px; }
+          .lp-grid-3 { grid-template-columns:1fr; gap:16px; }
+          .lp-grid-4 { grid-template-columns:repeat(2,1fr); }
+          .lp-grid-4 > div { border-right:none !important; border-bottom:1px solid rgba(255,255,255,0.07); }
+          .lp-grid-4 > div:nth-child(3), .lp-grid-4 > div:nth-child(4) { border-bottom:none; }
+          .lp-grid-steps { grid-template-columns:1fr; gap:32px; }
+          .lp-features-grid { grid-template-columns:1fr; }
+          .lp-roles-grid { grid-template-columns:1fr; }
+          .lp-section-pad { padding:52px 20px; }
+          .lp-section-pad-md { padding:48px 20px; }
+          .lp-signin-link { display:none; }
+        }
+      `}</style>
 
       {/* ── Nav ── */}
       <nav style={{ position: 'sticky', top: 0, zIndex: 50, background: 'rgba(255,255,255,0.97)', backdropFilter: 'blur(10px)', borderBottom: '1px solid #e2e8f0' }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px', height: 68, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div className="lp-nav-inner">
           <LogoFull size={36} showTagline />
           {/* Nav links */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <Link href="/login" style={{ fontSize: 14, fontWeight: 500, color: '#475569', textDecoration: 'none', padding: '9px 18px', borderRadius: 8, transition: 'background 0.15s' }}>Sign In</Link>
-            <Link href="/signup" style={{ fontSize: 14, fontWeight: 700, color: '#fff', background: 'linear-gradient(135deg, #1e40af 0%, #2563eb 100%)', padding: '10px 22px', borderRadius: 9, textDecoration: 'none', boxShadow: '0 2px 10px rgba(37,99,235,0.4)', letterSpacing: '-0.01em' }}>Get Started Free</Link>
+            <Link href="/login" className="lp-signin-link" style={{ fontSize: 14, fontWeight: 500, color: '#475569', textDecoration: 'none', padding: '9px 18px', borderRadius: 8 }}>Sign In</Link>
+            <Link href="/signup" style={{ fontSize: 14, fontWeight: 700, color: '#fff', background: 'linear-gradient(135deg, #1e40af 0%, #2563eb 100%)', padding: '10px 22px', borderRadius: 9, textDecoration: 'none', boxShadow: '0 2px 10px rgba(37,99,235,0.4)', letterSpacing: '-0.01em', whiteSpace: 'nowrap' }}>Get Started Free</Link>
           </div>
         </div>
       </nav>
 
       {/* ── Hero ── */}
-      <section style={{ background: 'linear-gradient(170deg, #f0f7ff 0%, #e8f0fe 40%, #f8faff 100%)', padding: '96px 32px 88px', position: 'relative', overflow: 'hidden' }}>
+      <section className="lp-hero" style={{ background: 'linear-gradient(170deg, #f0f7ff 0%, #e8f0fe 40%, #f8faff 100%)', position: 'relative', overflow: 'hidden' }}>
         {/* Subtle background grid */}
         <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle at 1px 1px, #dbeafe 1px, transparent 0)', backgroundSize: '32px 32px', opacity: 0.4, pointerEvents: 'none' }}/>
         <div style={{ maxWidth: 820, margin: '0 auto', textAlign: 'center', position: 'relative' }}>
           {/* Badge */}
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#fff', border: '1px solid #bfdbfe', color: '#1d4ed8', fontSize: 12, fontWeight: 700, padding: '6px 16px', borderRadius: 24, marginBottom: 32, letterSpacing: '0.05em', textTransform: 'uppercase', boxShadow: '0 2px 8px rgba(37,99,235,0.1)' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#fff', border: '1px solid #bfdbfe', color: '#1d4ed8', fontSize: 12, fontWeight: 700, padding: '6px 16px', borderRadius: 24, marginBottom: 28, letterSpacing: '0.05em', textTransform: 'uppercase', boxShadow: '0 2px 8px rgba(37,99,235,0.1)' }}>
             <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#2563eb', display: 'inline-block', boxShadow: '0 0 0 2px rgba(37,99,235,0.25)' }}/>
             Trusted by Transit Agencies Worldwide
           </div>
-          <h1 style={{ fontSize: 62, fontWeight: 900, color: '#0f172a', letterSpacing: '-0.045em', lineHeight: 1.06, margin: '0 0 24px' }}>
+          <h1 className="lp-hero-h1">
             From Issue to<br/>
             <span style={{ background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Resolution.</span>
           </h1>
-          <p style={{ fontSize: 20, color: '#475569', lineHeight: 1.65, margin: '0 0 44px', maxWidth: 580, marginLeft: 'auto', marginRight: 'auto' }}>
+          <p className="lp-hero-p">
             The complete fleet management platform for transit agencies. Track every bus, manage work orders, and keep your fleet moving — all in one place.
           </p>
-          <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 20 }}>
-            <Link href="/signup" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 15, fontWeight: 700, color: '#fff', background: 'linear-gradient(135deg, #1e40af 0%, #2563eb 100%)', padding: '15px 34px', borderRadius: 11, textDecoration: 'none', boxShadow: '0 6px 20px rgba(37,99,235,0.4)', letterSpacing: '-0.01em' }}>
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 20 }}>
+            <Link href="/signup" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 15, fontWeight: 700, color: '#fff', background: 'linear-gradient(135deg, #1e40af 0%, #2563eb 100%)', padding: '14px 30px', borderRadius: 11, textDecoration: 'none', boxShadow: '0 6px 20px rgba(37,99,235,0.4)', letterSpacing: '-0.01em', whiteSpace: 'nowrap' }}>
               Start Free Trial
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </Link>
-            <Link href="/login" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 15, fontWeight: 600, color: '#0f172a', background: '#fff', padding: '15px 28px', borderRadius: 11, textDecoration: 'none', border: '1.5px solid #e2e8f0', boxShadow: '0 2px 10px rgba(0,0,0,0.06)' }}>
-              Sign In to Your Account
+            <Link href="/login" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 15, fontWeight: 600, color: '#0f172a', background: '#fff', padding: '14px 24px', borderRadius: 11, textDecoration: 'none', border: '1.5px solid #e2e8f0', boxShadow: '0 2px 10px rgba(0,0,0,0.06)', whiteSpace: 'nowrap' }}>
+              Sign In
             </Link>
           </div>
-          <p style={{ fontSize: 13, color: '#94a3b8', margin: 0 }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, marginRight: 16 }}>
+          <p style={{ fontSize: 13, color: '#94a3b8', margin: 0, display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '8px 16px' }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
               No credit card required
             </span>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, marginRight: 16 }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
               10 buses free
             </span>
@@ -67,31 +101,31 @@ export default async function Home() {
       </section>
 
       {/* ── Stats Bar ── */}
-      <section style={{ background: '#0f172a', padding: '40px 32px' }}>
-        <div style={{ maxWidth: 960, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 0, textAlign: 'center' }}>
+      <section style={{ background: '#0f172a', padding: '40px 20px' }}>
+        <div className="lp-grid-4" style={{ maxWidth: 960, margin: '0 auto' }}>
           {[
             { value: '500+', label: 'Agencies Onboarded' },
             { value: '10,000+', label: 'Buses Tracked' },
             { value: '99.9%', label: 'Platform Uptime' },
             { value: '< 1 min', label: 'Avg. Report Time' },
           ].map((s, i) => (
-            <div key={i} style={{ padding: '8px 24px', borderRight: i < 3 ? '1px solid rgba(255,255,255,0.07)' : 'none' }}>
-              <div style={{ fontSize: 34, fontWeight: 900, color: '#60a5fa', letterSpacing: '-0.04em', lineHeight: 1 }}>{s.value}</div>
-              <div style={{ fontSize: 12.5, color: '#64748b', marginTop: 6, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{s.label}</div>
+            <div key={i} style={{ padding: '12px 24px', borderRight: i < 3 ? '1px solid rgba(255,255,255,0.07)' : 'none' }}>
+              <div style={{ fontSize: 30, fontWeight: 900, color: '#60a5fa', letterSpacing: '-0.04em', lineHeight: 1 }}>{s.value}</div>
+              <div style={{ fontSize: 11.5, color: '#64748b', marginTop: 6, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{s.label}</div>
             </div>
           ))}
         </div>
       </section>
 
       {/* ── How It Works ── */}
-      <section style={{ padding: '88px 32px', background: '#fff' }}>
+      <section className="lp-section-pad" style={{ background: '#fff' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: 64 }}>
+          <div style={{ textAlign: 'center', marginBottom: 48 }}>
             <div style={{ display: 'inline-block', fontSize: 11, fontWeight: 700, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12 }}>How It Works</div>
-            <h2 style={{ fontSize: 40, fontWeight: 900, color: '#0f172a', letterSpacing: '-0.04em', margin: '0 0 14px' }}>The complete work order workflow</h2>
+            <h2 className="lp-section-h2">The complete work order workflow</h2>
             <p style={{ fontSize: 17, color: '#64748b', margin: 0, maxWidth: 520, marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.6 }}>Three roles, one streamlined process — from breakdown to back in service.</p>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 28 }}>
+          <div className="lp-grid-3">
             {[
               {
                 step: '01',
@@ -161,14 +195,14 @@ export default async function Home() {
       </section>
 
       {/* ── Features Grid ── */}
-      <section style={{ padding: '80px 32px', background: '#f8fafc', borderTop: '1px solid #e2e8f0' }}>
+      <section className="lp-section-pad-md" style={{ background: '#f8fafc', borderTop: '1px solid #e2e8f0' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: 60 }}>
+          <div style={{ textAlign: 'center', marginBottom: 48 }}>
             <div style={{ display: 'inline-block', fontSize: 11, fontWeight: 700, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12 }}>Platform Features</div>
-            <h2 style={{ fontSize: 40, fontWeight: 900, color: '#0f172a', letterSpacing: '-0.04em', margin: '0 0 14px' }}>Everything your agency needs</h2>
+            <h2 className="lp-section-h2">Everything your agency needs</h2>
             <p style={{ fontSize: 17, color: '#64748b', margin: 0, lineHeight: 1.6 }}>Built specifically for transit operations teams — dispatchers, maintenance, and management.</p>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 20 }}>
+          <div className="lp-features-grid">
             {[
               {
                 color: '#2563eb',
@@ -220,14 +254,14 @@ export default async function Home() {
       </section>
 
       {/* ── Roles Section ── */}
-      <section style={{ padding: '80px 32px', background: '#fff' }}>
+      <section className="lp-section-pad-md" style={{ background: '#fff' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: 60 }}>
+          <div style={{ textAlign: 'center', marginBottom: 48 }}>
             <div style={{ display: 'inline-block', fontSize: 11, fontWeight: 700, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12 }}>Built for Every Role</div>
-            <h2 style={{ fontSize: 40, fontWeight: 900, color: '#0f172a', letterSpacing: '-0.04em', margin: '0 0 14px' }}>The right tool for every team member</h2>
+            <h2 className="lp-section-h2">The right tool for every team member</h2>
             <p style={{ fontSize: 17, color: '#64748b', margin: 0, lineHeight: 1.6 }}>Each role has purpose-built access — no training required.</p>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 20 }}>
+          <div className="lp-roles-grid">
             {[
               { role: 'Admin', color: '#2563eb', bg: '#eff6ff', border: '#bfdbfe', desc: 'Full fleet control. Manage buses, users, view all reports, and oversee the entire operation.', perms: ['Manage all buses', 'Invite & manage users', 'View all reports', 'All access'] },
               { role: 'Dispatch', color: '#ef4444', bg: '#fef2f2', border: '#fecaca', desc: 'Report and manage bus outages. Set out-of-service dates and trigger the work order workflow.', perms: ['Report breakdowns', 'Set OOS date', 'Auto-create WO', 'Update location'] },
@@ -252,14 +286,14 @@ export default async function Home() {
       </section>
 
       {/* ── Get Started Steps ── */}
-      <section style={{ padding: '80px 32px', background: '#f8fafc', borderTop: '1px solid #e2e8f0' }}>
+      <section className="lp-section-pad-md" style={{ background: '#f8fafc', borderTop: '1px solid #e2e8f0' }}>
         <div style={{ maxWidth: 900, margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: 56 }}>
+          <div style={{ textAlign: 'center', marginBottom: 48 }}>
             <div style={{ display: 'inline-block', fontSize: 11, fontWeight: 700, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12 }}>Get Started</div>
-            <h2 style={{ fontSize: 40, fontWeight: 900, color: '#0f172a', letterSpacing: '-0.04em', margin: '0 0 14px' }}>Up and running in minutes</h2>
+            <h2 className="lp-section-h2">Up and running in minutes</h2>
             <p style={{ fontSize: 17, color: '#64748b', margin: 0, lineHeight: 1.6 }}>No IT department required. Set up your fleet in three simple steps.</p>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 40, position: 'relative' }}>
+          <div className="lp-grid-steps">
             {[
               { step: '1', title: 'Create your account', desc: 'Sign up with your work email. Your organization is set up automatically — ready in under two minutes.' },
               { step: '2', title: 'Add your fleet', desc: 'Enter bus IDs and starting statuses. Assign manufacturers, locations, and any buses already out of service.' },
@@ -278,14 +312,14 @@ export default async function Home() {
       </section>
 
       {/* ── CTA Banner ── */}
-      <section style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #1d4ed8 100%)', padding: '88px 32px', position: 'relative', overflow: 'hidden' }}>
+      <section className="lp-section-pad" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #1d4ed8 100%)', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.04) 1px, transparent 0)', backgroundSize: '28px 28px', pointerEvents: 'none' }}/>
         <div style={{ maxWidth: 680, margin: '0 auto', textAlign: 'center', position: 'relative' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)', color: '#93c5fd', fontSize: 11, fontWeight: 700, padding: '5px 14px', borderRadius: 20, marginBottom: 24, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#60a5fa', display: 'inline-block' }}/>
             Start for Free Today
           </div>
-          <h2 style={{ fontSize: 44, fontWeight: 900, color: '#fff', letterSpacing: '-0.04em', margin: '0 0 16px', lineHeight: 1.1 }}>
+          <h2 className="lp-cta-h2">
             Ready to modernize<br/>your fleet management?
           </h2>
           <p style={{ fontSize: 17, color: 'rgba(255,255,255,0.7)', margin: '0 0 36px', lineHeight: 1.65, maxWidth: 500, marginLeft: 'auto', marginRight: 'auto' }}>

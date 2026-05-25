@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createServerComponentClient } from '@/lib/supabase-server'
 import Link from 'next/link'
+import { LogoFull } from '@/components/Logo'
 
 export default async function Home() {
   const supabase = createServerComponentClient()
@@ -13,22 +14,7 @@ export default async function Home() {
       {/* ── Nav ── */}
       <nav style={{ position: 'sticky', top: 0, zIndex: 50, background: 'rgba(255,255,255,0.97)', backdropFilter: 'blur(10px)', borderBottom: '1px solid #e2e8f0' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px', height: 68, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          {/* Logo */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 38, height: 38, background: 'linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(37,99,235,0.35)' }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                <rect x="2" y="8" width="20" height="12" rx="2" stroke="#fff" strokeWidth="1.7"/>
-                <circle cx="7" cy="20" r="2" fill="#93c5fd"/>
-                <circle cx="17" cy="20" r="2" fill="#93c5fd"/>
-                <path d="M5 8V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v2" stroke="#fff" strokeWidth="1.7"/>
-                <path d="M9 12h6M9 15h4" stroke="#93c5fd" strokeWidth="1.4" strokeLinecap="round"/>
-              </svg>
-            </div>
-            <div>
-              <span style={{ fontSize: 17, fontWeight: 800, color: '#0f172a', letterSpacing: '-0.03em' }}>Trackitlio</span>
-              <span style={{ display: 'block', fontSize: 9.5, color: '#94a3b8', letterSpacing: '0.08em', textTransform: 'uppercase', lineHeight: 1, marginTop: 1 }}>Fleet Management</span>
-            </div>
-          </div>
+          <LogoFull size={36} showTagline />
           {/* Nav links */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <Link href="/login" style={{ fontSize: 14, fontWeight: 500, color: '#475569', textDecoration: 'none', padding: '9px 18px', borderRadius: 8, transition: 'background 0.15s' }}>Sign In</Link>
@@ -324,18 +310,10 @@ export default async function Home() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 32, marginBottom: 32 }}>
             {/* Brand */}
             <div style={{ maxWidth: 280 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-                <div style={{ width: 32, height: 32, background: 'linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
-                    <rect x="2" y="8" width="20" height="12" rx="2" stroke="#fff" strokeWidth="1.7"/>
-                    <circle cx="7" cy="20" r="2" fill="#93c5fd"/>
-                    <circle cx="17" cy="20" r="2" fill="#93c5fd"/>
-                    <path d="M5 8V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v2" stroke="#fff" strokeWidth="1.7"/>
-                  </svg>
-                </div>
-                <span style={{ fontSize: 16, fontWeight: 800, color: '#f1f5f9', letterSpacing: '-0.02em' }}>Trackitlio</span>
+              <div style={{ marginBottom: 12 }}>
+                <LogoFull size={32} darkBg showTagline />
               </div>
-              <p style={{ fontSize: 13, color: '#475569', margin: 0, lineHeight: 1.65 }}>Fleet Management · From Issue to Resolution.<br/>Built for transit agencies worldwide.</p>
+              <p style={{ fontSize: 13, color: '#475569', margin: 0, lineHeight: 1.65 }}>Built for transit agencies worldwide.</p>
             </div>
             {/* Links */}
             <div style={{ display: 'flex', gap: 48, flexWrap: 'wrap' }}>

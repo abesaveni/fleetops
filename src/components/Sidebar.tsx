@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-client'
 import { useUser } from '@/context/UserContext'
+import { LogoFull } from '@/components/Logo'
 
 function BusUsageBar({ count, limit }: { count: number; limit: number }) {
   const pct      = Math.min((count / limit) * 100, 100)
@@ -65,13 +66,7 @@ export default function Sidebar() {
     <aside className="sidebar">
       <div className="sidebar-logo">
         <div className="sidebar-logo-inner">
-          <div className="sidebar-logo-icon">
-            <BusIcon/>
-          </div>
-          <div>
-            <h1>Track-it-Lio</h1>
-            <p>Fleet Management</p>
-          </div>
+          <LogoFull size={32} darkBg showTagline />
         </div>
       </div>
 

@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase-client'
 import { useRouter } from 'next/navigation'
+import { LogoStacked } from '@/components/Logo'
 
 export default function LoginPage() {
   const supabase = createClient()
@@ -25,18 +26,8 @@ export default function LoginPage() {
       <div style={{ width: '100%', maxWidth: 400 }}>
 
         {/* Logo */}
-        <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 56, height: 56, background: '#0f172a', borderRadius: 16, marginBottom: 16, boxShadow: '0 4px 16px rgba(15,23,42,0.25)' }}>
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-              <rect x="1" y="7" width="22" height="13" rx="2" stroke="#fff" strokeWidth="1.5"/>
-              <circle cx="6" cy="20" r="2" fill="#60a5fa"/>
-              <circle cx="18" cy="20" r="2" fill="#60a5fa"/>
-              <path d="M4 7V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2" stroke="#fff" strokeWidth="1.5"/>
-              <path d="M8 11h8M8 14h5" stroke="#60a5fa" strokeWidth="1.5" strokeLinecap="round"/>
-            </svg>
-          </div>
-          <h1 style={{ fontFamily: 'var(--font-body)', fontSize: 26, fontWeight: 700, letterSpacing: '-0.03em', margin: '0 0 5px', color: '#0f172a' }}>Track-it-Lio</h1>
-          <p style={{ fontSize: 13.5, color: '#94a3b8', margin: 0 }}>Fleet Management · From Issue to Resolution</p>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 32 }}>
+          <LogoStacked size={68} />
         </div>
 
         {/* Card */}

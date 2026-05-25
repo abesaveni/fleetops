@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase-client'
+import { LogoFull, LogoStacked } from '@/components/Logo'
 
 const FLEET_SIZES = ['1–10 buses', '11–25 buses', '26–50 buses', '51–100 buses', '101–250 buses', '250+ buses']
 
@@ -106,19 +107,11 @@ export default function SignupPage() {
       <div style={{ display: 'none', flex: 1, background: '#0f172a', flexDirection: 'column', justifyContent: 'center', padding: '64px 56px', maxWidth: 480 }}
         className="signup-panel">
         <div style={{ marginBottom: 48 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 48 }}>
-            <div style={{ width: 36, height: 36, background: '#1e293b', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                <rect x="1" y="7" width="22" height="13" rx="2" stroke="#60a5fa" strokeWidth="1.6"/>
-                <circle cx="6" cy="20" r="2" fill="#60a5fa"/>
-                <circle cx="18" cy="20" r="2" fill="#60a5fa"/>
-                <path d="M4 7V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2" stroke="#60a5fa" strokeWidth="1.6"/>
-              </svg>
-            </div>
-            <span style={{ fontSize: 18, fontWeight: 700, color: '#fff', letterSpacing: '-0.02em' }}>Track-it-Lio</span>
+          <div style={{ marginBottom: 48 }}>
+            <LogoFull size={34} darkBg showTagline />
           </div>
           <h2 style={{ fontSize: 30, fontWeight: 800, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.2, margin: '0 0 16px' }}>
-            Modern fleet management for U.S. transit agencies
+            Modern fleet management for transit agencies worldwide
           </h2>
           <p style={{ fontSize: 15, color: '#94a3b8', lineHeight: 1.65, margin: 0 }}>
             Track every bus. Know who's in service and who's down — in real time.
@@ -141,16 +134,8 @@ export default function SignupPage() {
         <div style={{ width: '100%', maxWidth: 480 }}>
 
           {/* Logo (mobile) */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 32, justifyContent: 'center' }}>
-            <div style={{ width: 36, height: 36, background: '#0f172a', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                <rect x="1" y="7" width="22" height="13" rx="2" stroke="#fff" strokeWidth="1.6"/>
-                <circle cx="6" cy="20" r="2" fill="#60a5fa"/>
-                <circle cx="18" cy="20" r="2" fill="#60a5fa"/>
-                <path d="M4 7V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2" stroke="#fff" strokeWidth="1.6"/>
-              </svg>
-            </div>
-            <span style={{ fontSize: 19, fontWeight: 700, color: '#0f172a', letterSpacing: '-0.02em' }}>Track-it-Lio</span>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 32 }}>
+            <LogoStacked size={60} />
           </div>
 
           {/* Step indicator */}

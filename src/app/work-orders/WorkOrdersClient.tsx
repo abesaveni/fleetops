@@ -33,14 +33,204 @@ function StatusPill({ status }: { status: string }) {
   )
 }
 
+/* ── Individual Work Order Print Document ─────────────────────── */
+function WOPrintModal({ wo, onClose }: { wo: WorkOrder; onClose: () => void }) {
+  const totalCost  = (wo.labour_cost ?? 0) + (wo.parts_cost ?? 0)
+  const statusConf = STATUS_COLORS[wo.status] ?? { bg: '#f1f5f9', text: '#475569' }
+  const printedOn  = new Date().toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' })
+
+  function doPrint() { window.print() }
+
+  return (
+    <>
+      <style>{`
+        @media print {
+          body * { visibility: hidden !important; }
+          .wo-print-doc, .wo-print-doc * { visibility: visible !important; }
+          .wo-print-doc {
+            position: fixed !important;
+            top: 0 !important; left: 0 !important;
+            width: 100% !important;
+            padding: 32px 40px !important;
+            background: #fff !important;
+            box-shadow: none !important;
+            border-radius: 0 !important;
+            max-height: unset !important;
+            overflow: visible !important;
+          }
+          .wo-no-print { display: none !important; }
+        }
+      `}</style>
+
+      {/* Backdrop */}
+      <div
+        onClick={onClose}
+        style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(3px)', zIndex: 400 }}
+      />
+
+      {/* Print Document */}
+      <div
+        className="wo-print-doc"
+        style={{
+          position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
+          width: 'min(720px, 95vw)', maxHeight: '90vh', overflowY: 'auto',
+          background: '#fff', borderRadius: 12, zIndex: 401,
+          padding: '0', boxShadow: '0 24px 64px rgba(0,0,0,0.25)',
+        }}
+      >
+        {/* Toolbar (hidden on print) */}
+        <div className="wo-no-print" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 24px', borderBottom: '1px solid #e2e8f0', background: '#f8fafc', borderRadius: '12px 12px 0 0' }}>
+          <span style={{ fontWeight: 700, fontSize: 14, color: '#0f172a' }}>Work Order — {wo.wo_number}</span>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button
+              onClick={doPrint}
+              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 18px', background: '#0f172a', color: '#fff', border: 'none', borderRadius: 7, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>
+              </svg>
+              Print
+            </button>
+            <button onClick={onClose} style={{ padding: '8px 14px', background: 'none', border: '1px solid #e2e8f0', borderRadius: 7, fontSize: 13, color: '#475569', cursor: 'pointer', fontWeight: 500 }}>
+              Close
+            </button>
+          </div>
+        </div>
+
+        {/* Document body */}
+        <div style={{ padding: '28px 32px', fontFamily: "'DM Sans', -apple-system, sans-serif" }}>
+
+          {/* Doc header */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24, paddingBottom: 20, borderBottom: '2px solid #0f172a' }}>
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#64748b', marginBottom: 4 }}>Work Order</div>
+              <div style={{ fontSize: 28, fontWeight: 900, color: '#0f172a', letterSpacing: '-0.03em', fontFamily: 'monospace' }}>{wo.wo_number}</div>
+            </div>
+            <div style={{ textAlign: 'right' }}>
+              <div style={{ display: 'inline-block', padding: '5px 14px', borderRadius: 20, background: statusConf.bg, color: statusConf.text, fontSize: 13, fontWeight: 700, marginBottom: 8 }}>
+                {STATUS_LABELS[wo.status] ?? wo.status}
+              </div>
+              <div style={{ fontSize: 11, color: '#94a3b8' }}>Printed {printedOn}</div>
+            </div>
+          </div>
+
+          {/* Section: Bus Information */}
+          <div style={{ marginBottom: 20 }}>
+            <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#64748b', marginBottom: 10, paddingBottom: 5, borderBottom: '1px solid #e2e8f0' }}>
+              Bus Information
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px 24px' }}>
+              <InfoCell label="Bus ID" value={wo.bus?.bus_id ?? '—'} bold />
+              <InfoCell label="Manufacturer" value={wo.bus?.manufacturer ?? '—'} />
+              <InfoCell label="Status" value={STATUS_LABELS[wo.status] ?? wo.status} />
+              <InfoCell label="Bus System" value={wo.bus_system ?? '—'} />
+              <InfoCell label="Asset Location" value={wo.asset_location ?? '—'} />
+              <InfoCell label="Estimated Repair Time" value={wo.estimated_repair_time ?? '—'} />
+            </div>
+          </div>
+
+          {/* Section: Dates */}
+          <div style={{ marginBottom: 20 }}>
+            <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#64748b', marginBottom: 10, paddingBottom: 5, borderBottom: '1px solid #e2e8f0' }}>
+              Dates
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px 24px' }}>
+              <InfoCell label="Date Out of Service" value={fmt(wo.date_out_of_service)} />
+              <InfoCell label="Back in Service" value={fmt(wo.back_in_service_date)} />
+              <InfoCell label="Work Order Created" value={fmt(wo.created_at)} />
+              {wo.closed_at && <InfoCell label="Work Order Closed" value={fmt(wo.closed_at)} />}
+            </div>
+          </div>
+
+          {/* Section: Issue */}
+          {wo.problem_description && (
+            <div style={{ marginBottom: 20 }}>
+              <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#64748b', marginBottom: 10, paddingBottom: 5, borderBottom: '1px solid #e2e8f0' }}>
+                Problem / Issue
+              </div>
+              <div style={{ fontSize: 14, color: '#0f172a', lineHeight: 1.65, background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8, padding: '12px 16px' }}>
+                {wo.problem_description}
+              </div>
+            </div>
+          )}
+
+          {/* Section: Maintenance */}
+          {wo.maintenance_comments && (
+            <div style={{ marginBottom: 20 }}>
+              <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#64748b', marginBottom: 10, paddingBottom: 5, borderBottom: '1px solid #e2e8f0' }}>
+                Maintenance Notes
+              </div>
+              <div style={{ fontSize: 14, color: '#0f172a', lineHeight: 1.65, background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 8, padding: '12px 16px' }}>
+                {wo.maintenance_comments}
+              </div>
+            </div>
+          )}
+
+          {/* Section: Costs */}
+          <div style={{ marginBottom: 4 }}>
+            <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#64748b', marginBottom: 10, paddingBottom: 5, borderBottom: '1px solid #e2e8f0' }}>
+              Cost Summary
+            </div>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
+              <thead>
+                <tr style={{ background: '#f8fafc' }}>
+                  <th style={{ textAlign: 'left', padding: '8px 14px', fontWeight: 600, color: '#475569', fontSize: 12, borderBottom: '1px solid #e2e8f0' }}>Description</th>
+                  <th style={{ textAlign: 'right', padding: '8px 14px', fontWeight: 600, color: '#475569', fontSize: 12, borderBottom: '1px solid #e2e8f0' }}>Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style={{ padding: '10px 14px', borderBottom: '1px solid #f1f5f9', color: '#0f172a' }}>Labour</td>
+                  <td style={{ padding: '10px 14px', borderBottom: '1px solid #f1f5f9', textAlign: 'right', color: '#0f172a', fontFamily: 'monospace' }}>
+                    {wo.labour_cost != null ? `$${wo.labour_cost.toFixed(2)}` : '—'}
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ padding: '10px 14px', borderBottom: '1px solid #f1f5f9', color: '#0f172a' }}>Parts</td>
+                  <td style={{ padding: '10px 14px', borderBottom: '1px solid #f1f5f9', textAlign: 'right', color: '#0f172a', fontFamily: 'monospace' }}>
+                    {wo.parts_cost != null ? `$${wo.parts_cost.toFixed(2)}` : '—'}
+                  </td>
+                </tr>
+                <tr style={{ background: '#0f172a' }}>
+                  <td style={{ padding: '11px 14px', color: '#fff', fontWeight: 700 }}>Total</td>
+                  <td style={{ padding: '11px 14px', textAlign: 'right', color: '#fff', fontWeight: 700, fontFamily: 'monospace', fontSize: 15 }}>
+                    {(wo.labour_cost != null || wo.parts_cost != null) ? `$${totalCost.toFixed(2)}` : '—'}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          {/* Footer */}
+          <div style={{ marginTop: 24, paddingTop: 14, borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: 11, color: '#94a3b8' }}>Trackitlio — From Issue to Resolution</span>
+            <span style={{ fontSize: 11, color: '#94a3b8', fontFamily: 'monospace' }}>{wo.wo_number}</span>
+          </div>
+        </div>
+      </div>
+    </>
+  )
+}
+
+function InfoCell({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
+  return (
+    <div>
+      <div style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.07em', color: '#94a3b8', marginBottom: 3 }}>{label}</div>
+      <div style={{ fontSize: 14, color: '#0f172a', fontWeight: bold ? 700 : 500, letterSpacing: bold ? '-0.01em' : undefined }}>{value}</div>
+    </div>
+  )
+}
+
+/* ── Main Component ──────────────────────────────────────────────── */
 export default function WorkOrdersClient({ workOrders, userRole }: { workOrders: WorkOrder[]; userRole: string }) {
-  const [search, setSearch]         = useState('')
+  const [search, setSearch]             = useState('')
   const [filterStatus, setFilterStatus] = useState('')
   const [filterSystem, setFilterSystem] = useState('')
-  const [filterMfr, setFilterMfr]   = useState('')
+  const [filterMfr, setFilterMfr]       = useState('')
   const [filterLocation, setFilterLocation] = useState('')
-  const [dateFrom, setDateFrom]     = useState('')
-  const [dateTo, setDateTo]         = useState('')
+  const [dateFrom, setDateFrom]         = useState('')
+  const [dateTo, setDateTo]             = useState('')
+  const [printWO, setPrintWO]           = useState<WorkOrder | null>(null)
 
   const allSystems   = useMemo(() => [...new Set(workOrders.map(w => w.bus_system).filter(Boolean))].sort(), [workOrders])
   const allLocations = useMemo(() => [...new Set(workOrders.map(w => w.asset_location).filter(Boolean))].sort(), [workOrders])
@@ -86,20 +276,21 @@ export default function WorkOrdersClient({ workOrders, userRole }: { workOrders:
     a.click(); URL.revokeObjectURL(url)
   }
 
-  function handlePrint() { window.print() }
-
   const totalLabour = filtered.reduce((s, w) => s + (w.labour_cost ?? 0), 0)
   const totalParts  = filtered.reduce((s, w) => s + (w.parts_cost ?? 0), 0)
 
   return (
     <>
+      {/* Print modal */}
+      {printWO && <WOPrintModal wo={printWO} onClose={() => setPrintWO(null)} />}
+
       <div className="page-header" style={{ marginBottom: 20 }}>
         <div>
           <h1 className="page-title">Work Order Reports</h1>
           <p className="page-subtitle">{filtered.length} of {workOrders.length} work orders</p>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
-          <button className="btn btn-secondary" onClick={handlePrint}>Print</button>
+          <button className="btn btn-secondary" onClick={() => window.print()}>Print All</button>
           <button className="btn btn-secondary" onClick={exportCSV}>Export CSV</button>
         </div>
       </div>
@@ -147,14 +338,14 @@ export default function WorkOrdersClient({ workOrders, userRole }: { workOrders:
 
       {/* Cost summary row */}
       {filtered.length > 0 && (
-        <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
+        <div style={{ display: 'flex', gap: 12, marginBottom: 12, flexWrap: 'wrap' }}>
           {[
             { label: 'Work Orders', value: filtered.length.toString(), color: '#3b82f6' },
             { label: 'Total Labour', value: `$${totalLabour.toFixed(2)}`, color: '#f97316' },
             { label: 'Total Parts', value: `$${totalParts.toFixed(2)}`, color: '#8b5cf6' },
             { label: 'Total Cost', value: `$${(totalLabour + totalParts).toFixed(2)}`, color: '#0ea5e9' },
           ].map(({ label, value, color }) => (
-            <div key={label} className="card" style={{ padding: '10px 16px', flex: 1, borderTop: `3px solid ${color}` }}>
+            <div key={label} className="card" style={{ padding: '10px 16px', flex: '1 1 120px', borderTop: `3px solid ${color}` }}>
               <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 500 }}>{label}</div>
               <div style={{ fontSize: 18, fontWeight: 700, color: '#0f172a', marginTop: 2 }}>{value}</div>
             </div>
@@ -180,6 +371,7 @@ export default function WorkOrdersClient({ workOrders, userRole }: { workOrders:
                 <th>Labour</th>
                 <th>Parts</th>
                 <th>Total</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -199,6 +391,20 @@ export default function WorkOrdersClient({ workOrders, userRole }: { workOrders:
                     {(w.labour_cost != null || w.parts_cost != null)
                       ? `$${((w.labour_cost ?? 0) + (w.parts_cost ?? 0)).toFixed(2)}`
                       : '—'}
+                  </td>
+                  <td>
+                    <button
+                      onClick={() => setPrintWO(w)}
+                      title="Print this work order"
+                      style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 11px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 6, cursor: 'pointer', fontSize: 12, fontWeight: 500, color: '#475569', whiteSpace: 'nowrap', fontFamily: 'inherit' }}
+                      onMouseEnter={e => { e.currentTarget.style.background = '#0f172a'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = '#0f172a' }}
+                      onMouseLeave={e => { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.color = '#475569'; e.currentTarget.style.borderColor = '#e2e8f0' }}
+                    >
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                        <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>
+                      </svg>
+                      Print
+                    </button>
                   </td>
                 </tr>
               ))}

@@ -127,7 +127,7 @@ export default function DashboardClient({ counts, buses, userRole }: Props) {
       </div>
 
       {/* KPI cards — 6 cards */}
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(6, 1fr)', gap:10 }}>
+      <div className="dash-kpi-grid">
         {STAT_CONFIG.map(({ key, label, sub, icon: Icon, accent, bg, iconBg }) => {
           const val = counts[key as keyof typeof counts] as number
           const pct = counts.total > 0 && key !== 'total' ? Math.round((val / counts.total) * 100) : null
@@ -157,7 +157,7 @@ export default function DashboardClient({ counts, buses, userRole }: Props) {
       </div>
 
       {/* Middle row */}
-      <div style={{ display:'grid', gridTemplateColumns:'210px 1fr 1fr', gap:12 }}>
+      <div className="dash-mid-row">
 
         {/* Donut */}
         <div style={{ background:'#fff', border:'1px solid #e2e8f0', borderRadius:10, padding:'16px 14px', display:'flex', flexDirection:'column' }}>

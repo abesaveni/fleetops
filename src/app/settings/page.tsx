@@ -58,7 +58,7 @@ export default function SettingsPage() {
             <h3 style={{ fontSize: 15, fontWeight: 700, margin: '0 0 18px', color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
               Organization
             </h3>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px 32px' }}>
+            <div className="responsive-2col">
               {[
                 { label: 'Organization Name', value: orgName || '—' },
                 { label: 'Your Role',         value: user?.role || '—' },

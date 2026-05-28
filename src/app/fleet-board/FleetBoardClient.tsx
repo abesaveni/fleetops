@@ -80,16 +80,16 @@ export default function FleetBoardClient({ buses, userRole }: { buses: BusRecord
     <>
       {toast && <Toast message={toast}/>}
 
-      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:16, flexWrap:'wrap', gap:10 }}>
+      <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:16, flexWrap:'wrap', gap:10 }}>
         <div>
           <h1 style={{ fontSize:20, fontWeight:600, margin:0, color:'#0f172a', letterSpacing:'-0.02em' }}>Fleet Board</h1>
           <p style={{ fontSize:12, color:'#94a3b8', margin:'3px 0 0', fontWeight:400 }}>{buses.length} buses · {dateStr} · {timeStr}</p>
         </div>
-        <div style={{ display:'flex', gap:8, alignItems:'center' }}>
+        <div style={{ display:'flex', gap:8, alignItems:'center', flexWrap:'wrap' }}>
           <div style={{ position:'relative' }}>
             <svg style={{ position:'absolute', left:9, top:'50%', transform:'translateY(-50%)', color:'#94a3b8' }} width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             <input
-              className="input" style={{ paddingLeft:30, width:180, fontSize:12, height:34 }}
+              className="input" style={{ paddingLeft:30, width:160, fontSize:12, height:34 }}
               placeholder="Search buses…" value={search} onChange={e => setSearch(e.target.value)}
             />
           </div>

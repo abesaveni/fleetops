@@ -378,8 +378,108 @@ tbody tr:hover { background: #f0f7ff; }
 .caption { font-size: 12px; color: var(--text-muted); }
 .label-sm { font-size: 12px; font-weight: 600; color: var(--text-secondary); letter-spacing: 0.03em; }
 
+/* ─── Mobile Top Bar ────────────────────────────────────────────── */
+.mobile-topbar {
+  display: none;
+  position: fixed; top: 0; left: 0; right: 0; height: 56px;
+  background: var(--sidebar-bg); z-index: 200;
+  align-items: center; padding: 0 16px; gap: 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+.mobile-hamburger {
+  background: none; border: none;
+  color: rgba(194,202,212,0.88); cursor: pointer;
+  padding: 7px; display: flex; align-items: center; justify-content: center;
+  border-radius: 6px; flex-shrink: 0;
+  transition: background 0.1s;
+}
+.mobile-hamburger:hover { background: rgba(255,255,255,0.1); }
+.mobile-close-btn {
+  display: none; background: none; border: none;
+  color: rgba(194,202,212,0.7); cursor: pointer;
+  padding: 5px; align-items: center; justify-content: center;
+  border-radius: 5px; flex-shrink: 0; transition: background 0.1s;
+}
+.mobile-close-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+.mobile-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.55); backdrop-filter: blur(2px);
+  z-index: 280;
+}
+
+/* ─── Responsive Grid Helpers ────────────────────────────────────── */
+.dash-kpi-grid  { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+.dash-mid-row   { display: grid; grid-template-columns: 210px 1fr 1fr; gap: 12px; }
+.responsive-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px 32px; }
+
+/* ─── Tablet (≤ 1024px) ─────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .dash-kpi-grid { grid-template-columns: repeat(3, 1fr); }
+  .dash-mid-row  { grid-template-columns: 1fr 1fr; }
+  .dash-mid-row > *:first-child { grid-column: 1 / -1; }
+}
+
+/* ─── Mobile (≤ 768px) ───────────────────────────────────────────── */
 @media (max-width: 768px) {
-  .form-grid { grid-template-columns: 1fr; }
-  .sidebar { display: none; }
-  .main-content { padding: 16px; max-height: unset; }
+  .form-grid     { grid-template-columns: 1fr; }
+  .responsive-2col { grid-template-columns: 1fr; }
+  .dash-kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .dash-mid-row  { grid-template-columns: 1fr; }
+
+  /* Mobile topbar visible */
+  .mobile-topbar { display: flex; }
+  .mobile-close-btn { display: flex; }
+  .mobile-overlay { display: block; }
+
+  /* Sidebar → fixed drawer, hidden off-screen by default */
+  .sidebar {
+    display: flex !important;
+    position: fixed !important;
+    top: 0; left: 0;
+    height: 100vh !important;
+    z-index: 300;
+    transform: translateX(-100%);
+    transition: transform 0.26s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: none;
+  }
+  .sidebar.mobile-open {
+    transform: translateX(0);
+    box-shadow: 4px 0 32px rgba(0,0,0,0.4);
+  }
+
+  /* Main content: push down for topbar */
+  .main-content {
+    padding: 72px 16px 24px !important;
+    max-height: unset;
+  }
+
+  /* Page headers */
+  .page-title   { font-size: 20px; }
+  .page-header  { margin-bottom: 16px; }
+
+  /* Stat cards on mobile */
+  .stat-card-number { font-size: 24px; }
+
+  /* Tables: ensure horizontal scroll */
+  .table-wrap { -webkit-overflow-scrolling: touch; }
+  table       { min-width: 520px; }
+
+  /* Toast */
+  .toast { left: 16px; right: 16px; bottom: 16px; max-width: unset; }
+
+  /* Modal */
+  .modal { padding: 20px; border-radius: 12px; }
+
+  /* Buttons in header — stack on very small screens */
+  .page-header .btn { font-size: 12px; padding: 7px 12px; }
+}
+
+/* ─── Small Mobile (≤ 480px) ─────────────────────────────────────── */
+@media (max-width: 480px) {
+  .dash-kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+  .main-content  { padding: 68px 12px 20px !important; }
+  .card          { padding: 16px; }
+  h1 { font-size: 22px; }
+  h2 { font-size: 19px; }
 }

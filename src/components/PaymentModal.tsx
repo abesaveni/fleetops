@@ -41,10 +41,17 @@ export default function PaymentModal({ planId, planName, price, billingPeriod, o
 
   return (
     <div
-      style={{ position:'fixed', inset:0, zIndex:1000, background:'rgba(0,0,0,0.55)', display:'flex', alignItems:'center', justifyContent:'center', padding:16 }}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 1000,
+        background: 'rgba(0,0,0,0.55)',
+        overflowY: 'auto',
+        display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
+        padding: '24px 16px',
+        WebkitOverflowScrolling: 'touch',
+      }}
       onClick={e => { if (e.target === e.currentTarget) onClose() }}
     >
-      <div style={{ background:'#fff', borderRadius:16, padding:32, width:'100%', maxWidth:460, boxShadow:'0 20px 60px rgba(0,0,0,0.25)' }}>
+      <div style={{ background:'#fff', borderRadius:16, padding:32, width:'100%', maxWidth:460, boxShadow:'0 20px 60px rgba(0,0,0,0.25)', margin:'auto', flexShrink: 0 }}>
 
         {/* Header */}
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:24 }}>

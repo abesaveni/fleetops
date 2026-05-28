@@ -150,7 +150,7 @@ export default function UpgradePage() {
         </div>
 
         {/* Plan cards */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 20, maxWidth: 720, margin: '0 auto' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20, maxWidth: 720, margin: '0 auto' }}>
           {PLANS.map(plan => {
             const isCurrent  = currentPlan === plan.id
             const isPopular  = plan.tag === 'Most Popular'

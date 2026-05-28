@@ -299,35 +299,37 @@ export default function DashboardClient({ counts, buses, userRole }: Props) {
         {buses.length === 0 ? (
           <div className="empty-state">No buses added yet</div>
         ) : (
-          <table style={{ width:'100%', borderCollapse:'collapse' }}>
-            <thead>
-              <tr style={{ background:'#f8fafc' }}>
-                {['Bus ID','Status','Manufacturer','System','Location','OOS Date','BIS Date'].map(h => (
-                  <th key={h} style={{ padding:'8px 16px', textAlign:'left', fontSize:10, fontWeight:500, color:'#94a3b8', textTransform:'uppercase', letterSpacing:'0.07em', borderBottom:'1px solid #f1f5f9', whiteSpace:'nowrap' }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {recent.map((bus, i) => (
-                <tr key={bus.id} onClick={() => router.push(`/buses/${bus.id}`)} style={{ cursor:'pointer', transition:'background 0.1s', borderBottom: i < recent.length-1 ? '1px solid #f8fafc' : 'none' }} onMouseEnter={e => (e.currentTarget.style.background = '#f8fafc')} onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
-                  <td style={{ padding:'10px 16px' }}>
-                    <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-                      <div style={{ width:24, height:24, borderRadius:6, background:'#eff6ff', display:'flex', alignItems:'center', justifyContent:'center' }}>
-                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round"><rect x="1" y="7" width="22" height="13" rx="2"/><circle cx="6" cy="20" r="2"/><circle cx="18" cy="20" r="2"/><path d="M4 7V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2"/></svg>
-                      </div>
-                      <span style={{ fontWeight:600, color:'#1d6fce', fontSize:12 }}>{bus.bus_id}</span>
-                    </div>
-                  </td>
-                  <td style={{ padding:'10px 16px' }}><StatusBadge status={bus.bus_status}/></td>
-                  <td style={{ padding:'10px 16px', fontSize:12, color:'#475569', fontWeight:400 }}>{bus.manufacturer ?? '—'}</td>
-                  <td style={{ padding:'10px 16px', fontSize:12, color:'#475569', fontWeight:400 }}>{bus.bus_system ?? '—'}</td>
-                  <td style={{ padding:'10px 16px', fontSize:12, color:'#475569', fontWeight:400 }}>{bus.location ?? '—'}</td>
-                  <td style={{ padding:'10px 16px', fontSize:11, color:'#94a3b8', fontWeight:400 }}>{fmt(bus.out_of_service_date)}</td>
-                  <td style={{ padding:'10px 16px', fontSize:11, color:'#94a3b8', fontWeight:400 }}>{fmt(bus.back_in_service_date)}</td>
+          <div style={{ overflowX:'auto', WebkitOverflowScrolling:'touch' }}>
+            <table style={{ width:'100%', borderCollapse:'collapse', minWidth:560 }}>
+              <thead>
+                <tr style={{ background:'#f8fafc' }}>
+                  {['Bus ID','Status','Manufacturer','System','Location','OOS Date','BIS Date'].map(h => (
+                    <th key={h} style={{ padding:'8px 16px', textAlign:'left', fontSize:10, fontWeight:500, color:'#94a3b8', textTransform:'uppercase', letterSpacing:'0.07em', borderBottom:'1px solid #f1f5f9', whiteSpace:'nowrap' }}>{h}</th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {recent.map((bus, i) => (
+                  <tr key={bus.id} onClick={() => router.push(`/buses/${bus.id}`)} style={{ cursor:'pointer', transition:'background 0.1s', borderBottom: i < recent.length-1 ? '1px solid #f8fafc' : 'none' }} onMouseEnter={e => (e.currentTarget.style.background = '#f8fafc')} onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+                    <td style={{ padding:'10px 16px' }}>
+                      <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                        <div style={{ width:24, height:24, borderRadius:6, background:'#eff6ff', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round"><rect x="1" y="7" width="22" height="13" rx="2"/><circle cx="6" cy="20" r="2"/><circle cx="18" cy="20" r="2"/><path d="M4 7V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2"/></svg>
+                        </div>
+                        <span style={{ fontWeight:600, color:'#1d6fce', fontSize:12, whiteSpace:'nowrap' }}>{bus.bus_id}</span>
+                      </div>
+                    </td>
+                    <td style={{ padding:'10px 16px', whiteSpace:'nowrap' }}><StatusBadge status={bus.bus_status}/></td>
+                    <td style={{ padding:'10px 16px', fontSize:12, color:'#475569', fontWeight:400, whiteSpace:'nowrap' }}>{bus.manufacturer ?? '—'}</td>
+                    <td style={{ padding:'10px 16px', fontSize:12, color:'#475569', fontWeight:400, whiteSpace:'nowrap' }}>{bus.bus_system ?? '—'}</td>
+                    <td style={{ padding:'10px 16px', fontSize:12, color:'#475569', fontWeight:400, whiteSpace:'nowrap' }}>{bus.location ?? '—'}</td>
+                    <td style={{ padding:'10px 16px', fontSize:11, color:'#94a3b8', fontWeight:400, whiteSpace:'nowrap' }}>{fmt(bus.out_of_service_date)}</td>
+                    <td style={{ padding:'10px 16px', fontSize:11, color:'#94a3b8', fontWeight:400, whiteSpace:'nowrap' }}>{fmt(bus.back_in_service_date)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>

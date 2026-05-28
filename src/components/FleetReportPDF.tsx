@@ -7,14 +7,12 @@ const STATUS_COLOR: Record<string,string> = {
   OOS: '#991b1b',
   UR:  '#9a3412',
   PP:  '#854d0e',
-  RS:  '#0e7490',
 }
 const STATUS_BG: Record<string,string> = {
   IS:  '#dcfce7',
   OOS: '#fee2e2',
   UR:  '#fff7ed',
   PP:  '#fef9c3',
-  RS:  '#d0f4f7',
 }
 
 const s = StyleSheet.create({
@@ -45,7 +43,6 @@ export default function FleetReportPDF({ buses }: { buses: BusRecord[] }) {
   const OOS  = buses.filter(b=>b.bus_status==='OOS').length
   const UR   = buses.filter(b=>b.bus_status==='UR').length
   const PP   = buses.filter(b=>b.bus_status==='PP').length
-  const RS   = buses.filter(b=>b.bus_status==='RS').length
   const fmt  = (d:string|null) => d ? new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '—'
 
   return (
@@ -62,7 +59,6 @@ export default function FleetReportPDF({ buses }: { buses: BusRecord[] }) {
             ['Out of Svc',   OOS,          '#ef4444'],
             ['Under Repair', UR,           '#f97316'],
             ['Pending Parts',PP,           '#eab308'],
-            ['Returned',     RS,           '#06b6d4'],
           ] as const).map(([l,v,c])=>(
             <View key={String(l)} style={s.statBox}><Text style={s.statLbl}>{l}</Text><Text style={[s.statNum,{color:c}]}>{v}</Text></View>
           ))}

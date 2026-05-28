@@ -1,11 +1,10 @@
-export type BusStatus = 'IS' | 'OOS' | 'UR' | 'PP' | 'RS'
+export type BusStatus = 'IS' | 'OOS' | 'UR' | 'PP'
 
 export const STATUS_LABELS: Record<BusStatus, string> = {
   IS:  'In Service',
   OOS: 'Out of Service',
   UR:  'Under Repair',
   PP:  'Pending Parts',
-  RS:  'Returned to Service',
 }
 
 export const STATUS_COLORS: Record<BusStatus, { bg: string; text: string; dot: string }> = {
@@ -13,7 +12,6 @@ export const STATUS_COLORS: Record<BusStatus, { bg: string; text: string; dot: s
   OOS: { bg: '#fee2e2', text: '#991b1b', dot: '#ef4444' },
   UR:  { bg: '#fff7ed', text: '#9a3412', dot: '#f97316' },
   PP:  { bg: '#fef9c3', text: '#854d0e', dot: '#eab308' },
-  RS:  { bg: '#d0f4f7', text: '#0e7490', dot: '#06b6d4' },
 }
 
 export interface BusRecord {
@@ -72,7 +70,7 @@ export interface WorkOrder {
   org_id:                string
   bus_record_id:         string
   wo_number:             string
-  status:                'open' | 'under_repair' | 'pending_parts' | 'completed' | 'closed' | 'returned_to_service'
+  status:                'open' | 'under_repair' | 'pending_parts' | 'completed' | 'closed'
   date_out_of_service:   string | null
   problem_description:   string | null
   asset_location:        string | null

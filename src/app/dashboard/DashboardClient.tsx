@@ -7,7 +7,7 @@ import StatusBadge from '@/components/StatusBadge'
 import BusLimitBanner from '@/components/BusLimitBanner'
 
 interface Props {
-  counts:   { total:number; IS:number; OOS:number; UR:number; PP:number; RS:number }
+  counts:   { total:number; IS:number; OOS:number; UR:number; PP:number }
   buses:    BusRecord[]
   userRole: string
 }
@@ -38,11 +38,6 @@ const IconClock = () => (
     <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
   </svg>
 )
-const IconReturn = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-    <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.49"/>
-  </svg>
-)
 const IconArrow = () => (
   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
     <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
@@ -55,16 +50,14 @@ const STAT_CONFIG = [
   { key:'OOS',   label:'Out of Service',        sub:'Need attention',      icon: IconAlert,  accent:'#dc2626', bg:'#fef2f2', iconBg:'#fee2e2' },
   { key:'UR',    label:'Under Repair',          sub:'Active maintenance',  icon: IconWrench, accent:'#ea580c', bg:'#fff7ed', iconBg:'#ffedd5' },
   { key:'PP',    label:'Pending Parts',         sub:'Waiting for parts',   icon: IconClock,  accent:'#ca8a04', bg:'#fefce8', iconBg:'#fef9c3' },
-  { key:'RS',    label:'Returned to Service',   sub:'Recently restored',   icon: IconReturn, accent:'#0891b2', bg:'#ecfeff', iconBg:'#d0f4f7' },
 ]
 
-const STATUS_DOT_COLORS: Record<string,string> = { IS:'#22c55e', OOS:'#ef4444', UR:'#f97316', PP:'#eab308', RS:'#06b6d4' }
+const STATUS_DOT_COLORS: Record<string,string> = { IS:'#22c55e', OOS:'#ef4444', UR:'#f97316', PP:'#eab308' }
 const PIE_DATA = [
   { key:'IS',  name:'In Service',          color:'#22c55e' },
   { key:'OOS', name:'Out of Service',      color:'#ef4444' },
   { key:'UR',  name:'Under Repair',        color:'#f97316' },
   { key:'PP',  name:'Pending Parts',       color:'#eab308' },
-  { key:'RS',  name:'Returned to Service', color:'#06b6d4' },
 ]
 
 function fmt(d: string|null) {
@@ -94,7 +87,7 @@ export default function DashboardClient({ counts, buses, userRole }: Props) {
     PIE_DATA.map(d => ({ ...d, value: counts[d.key as keyof typeof counts] as number })).filter(d => d.value > 0),
     [counts]
   )
-  const attention = useMemo(() => buses.filter(b => b.bus_status !== 'IS' && b.bus_status !== 'RS').slice(0, 6), [buses])
+  const attention = useMemo(() => buses.filter(b => b.bus_status !== 'IS').slice(0, 6), [buses])
   const recent    = useMemo(() => buses.slice(0, 7), [buses])
   const today     = new Date().toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long', year:'numeric' })
 
@@ -208,7 +201,6 @@ export default function DashboardClient({ counts, buses, userRole }: Props) {
               { key:'OOS', label:'Out of Service',      color:'#ef4444', bg:'#fee2e2', textColor:'#b91c1c' },
               { key:'UR',  label:'Under Repair',        color:'#f97316', bg:'#ffedd5', textColor:'#c2410c' },
               { key:'PP',  label:'Pending Parts',       color:'#eab308', bg:'#fef9c3', textColor:'#854d0e' },
-              { key:'RS',  label:'Returned to Service', color:'#06b6d4', bg:'#d0f4f7', textColor:'#0e7490' },
             ].map(({ key, label, color, bg, textColor }) => {
               const val = counts[key as keyof typeof counts] as number
               const pct = counts.total > 0 ? (val / counts.total) * 100 : 0

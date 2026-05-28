@@ -8,7 +8,6 @@ const STATUS_LABELS: Record<string, string> = {
   pending_parts:       'Pending Parts',
   completed:           'Completed',
   closed:              'Closed',
-  returned_to_service: 'Returned to Service',
 }
 
 const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
@@ -17,7 +16,6 @@ const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
   pending_parts:       { bg: '#fef9c3', text: '#854d0e' },
   completed:           { bg: '#dcfce7', text: '#166534' },
   closed:              { bg: '#f1f5f9', text: '#475569' },
-  returned_to_service: { bg: '#d0f4f7', text: '#0e7490' },
 }
 
 function fmt(d: string | null) {

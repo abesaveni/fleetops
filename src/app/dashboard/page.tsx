@@ -16,7 +16,7 @@ export default async function DashboardPage() {
     getDashboardCounts(sub.org_id),
     getAllBuses(sub.org_id),
   ])
-  const counts = { total: rawCounts.total, IS: rawCounts.IS, OOS: rawCounts.OOS, UR: rawCounts.UR ?? 0, PP: rawCounts.PP ?? 0, RS: rawCounts.RS ?? 0 }
+  const counts = { total: rawCounts.total, IS: rawCounts.IS, OOS: rawCounts.OOS, UR: rawCounts.UR ?? 0, PP: rawCounts.PP ?? 0 }
 
   return (
     <div className="layout">

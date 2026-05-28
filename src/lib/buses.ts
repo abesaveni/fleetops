@@ -32,7 +32,6 @@ export async function getDashboardCounts(orgId: string) {
     OOS:   buses.filter(b => b.bus_status === 'OOS').length,
     UR:    buses.filter(b => b.bus_status === 'UR').length,
     PP:    buses.filter(b => b.bus_status === 'PP').length,
-    RS:    buses.filter(b => b.bus_status === 'RS').length,
   }
 }
 

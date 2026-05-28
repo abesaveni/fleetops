@@ -11,7 +11,6 @@ const FILTERS = [
   { key:'OOS', label:'Out of Service' },
   { key:'UR',  label:'Under Repair' },
   { key:'PP',  label:'Pending Parts' },
-  { key:'RS',  label:'Returned to Service' },
 ]
 
 export default function BusListClient({ buses, initialStatus, initialSearch, userRole }: { buses:BusRecord[]; initialStatus:BusStatus|null; initialSearch:string; userRole:string }) {

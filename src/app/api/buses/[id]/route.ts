@@ -54,7 +54,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   // Workflow-driven status — BIS always wins; OOS on first report; otherwise use maintenance's manual selection
   let bus_status = (body.bus_status as string) || currentBus.bus_status
   if (settingOOS && !settingBIS) bus_status = 'OOS'
-  if (settingBIS) bus_status = 'RS'
+  if (settingBIS) bus_status = 'IS'
 
   const { data, error } = await admin
     .from('bus_records')
@@ -122,7 +122,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
     if (openWO) {
       await admin.from('work_orders').update({
-        status:                'returned_to_service',
+        status:                'closed',
         back_in_service_date:  body.back_in_service_date,
         bus_system:            body.bus_system            || null,
         estimated_repair_time: body.estimated_repair_time || null,

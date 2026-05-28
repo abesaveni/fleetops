@@ -209,7 +209,7 @@ export default function BusForm({ bus, mode, userRole }: { bus?: BusRecord; mode
         <SectionHeader title="Maintenance / Work Order" subtitle="Maintenance — complete repair details to close work order" color="#f97316"/>
         <div className="form-grid">
           {/* Repair Status — Maintenance can set OOS / Under Repair / Pending Parts.
-              In Service and Returned to Service are set automatically by the workflow. */}
+              In Service is set automatically by the workflow when BIS date is entered. */}
           <div className="form-group">
             <label className="form-label">
               Repair Status
@@ -217,12 +217,12 @@ export default function BusForm({ bus, mode, userRole }: { bus?: BusRecord; mode
                 <span style={{ fontSize: 11, fontWeight: 500, color: '#f97316', marginLeft: 6 }}>manually update</span>
               )}
               {form.back_in_service_date && (
-                <span style={{ fontSize: 11, fontWeight: 500, color: '#16a34a', marginLeft: 6 }}>auto → Returned to Service</span>
+                <span style={{ fontSize: 11, fontWeight: 500, color: '#16a34a', marginLeft: 6 }}>auto → In Service</span>
               )}
             </label>
             <select
               className={inputClass}
-              value={form.back_in_service_date ? 'RS' : (form.bus_status || '')}
+              value={form.back_in_service_date ? 'IS' : (form.bus_status || '')}
               onChange={e => set('bus_status', e.target.value)}
               disabled={!isMaintenance || !!form.back_in_service_date}
               style={(!isMaintenance || !!form.back_in_service_date) ? disabledStyle : undefined}
@@ -231,7 +231,7 @@ export default function BusForm({ bus, mode, userRole }: { bus?: BusRecord; mode
               <option value="OOS">Out of Service</option>
               <option value="UR">Under Repair</option>
               <option value="PP">Pending Parts</option>
-              {form.back_in_service_date && <option value="RS">Returned to Service</option>}
+              {form.back_in_service_date && <option value="IS">In Service</option>}
             </select>
           </div>
           <div className="form-group">
@@ -327,7 +327,7 @@ export default function BusForm({ bus, mode, userRole }: { bus?: BusRecord; mode
             </div>
             <div style={{ padding: '10px 14px', background: '#f0fdf4', borderRadius: 8, border: '1px solid #bbf7d0', fontSize: 12.5, color: '#15803d' }}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{ display: 'inline', marginRight: 6 }}><polyline points="20 6 9 17 4 12"/></svg>
-              Setting a <strong>Back in Service Date</strong> will automatically close the Work Order and change bus status to <strong>Returned to Service</strong>.
+              Setting a <strong>Back in Service Date</strong> will automatically close the Work Order and change bus status to <strong>In Service</strong>.
             </div>
           </div>
         )}

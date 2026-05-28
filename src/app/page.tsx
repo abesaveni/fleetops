@@ -169,8 +169,8 @@ export default async function Home() {
                   </svg>
                 ),
                 title: 'Return to service',
-                desc: 'Set the back-in-service date — work order closes automatically, bus status updates to Returned to Service.',
-                tags: ['Auto WO Close', 'Status → RS', 'Full Audit Trail'],
+                desc: 'Set the back-in-service date — work order closes automatically, bus status returns to In Service.',
+                tags: ['Auto WO Close', 'Status → In Service', 'Full Audit Trail'],
               },
             ].map((item, i) => (
               <div key={i} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 16, padding: '32px 28px', position: 'relative', overflow: 'hidden' }}>

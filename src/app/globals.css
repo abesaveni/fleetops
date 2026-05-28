@@ -83,13 +83,11 @@ a:hover { text-decoration: underline; color: var(--brand-hover); }
 .badge-OOS { background: #fde8e8; color: #b91c1c; border: 1px solid #fbb6b6; }
 .badge-UR  { background: #fff3cd; color: #9a6700; border: 1px solid #ffd97d; }
 .badge-PP  { background: #fef9c3; color: #854d0e; border: 1px solid #fde047; }
-.badge-RS  { background: #d0f4f7; color: #0e7490; border: 1px solid #67e8f9; }
 .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
 .dot-IS  { background: #22c55e; }
 .dot-OOS { background: #ef4444; }
 .dot-UR  { background: #f97316; }
 .dot-PP  { background: #eab308; }
-.dot-RS  { background: #06b6d4; }
 
 /* ─── Role Badges ──────────────────────────────────────────────── */
 .role-badge {

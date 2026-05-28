@@ -9,7 +9,6 @@ const STATUS_CONFIG = {
   OOS: { label:'Out of Service',        cellBg:'#dc2626', cellText:'#ffffff', legendBg:'#fee2e2', legendText:'#b91c1c' },
   UR:  { label:'Under Repair',          cellBg:'#ea580c', cellText:'#ffffff', legendBg:'#ffedd5', legendText:'#c2410c' },
   PP:  { label:'Pending Parts',         cellBg:'#ca8a04', cellText:'#ffffff', legendBg:'#fef9c3', legendText:'#854d0e' },
-  RS:  { label:'Returned to Service',   cellBg:'#0891b2', cellText:'#ffffff', legendBg:'#d0f4f7', legendText:'#0e7490' },
 } as const
 
 export default function FleetBoardClient({ buses, userRole }: { buses: BusRecord[]; userRole: string }) {
@@ -71,7 +70,6 @@ export default function FleetBoardClient({ buses, userRole }: { buses: BusRecord
     OOS: buses.filter(b => b.bus_status === 'OOS').length,
     UR:  buses.filter(b => b.bus_status === 'UR').length,
     PP:  buses.filter(b => b.bus_status === 'PP').length,
-    RS:  buses.filter(b => b.bus_status === 'RS').length,
   }), [buses])
 
   const hoveredBus = hovered ? buses.find(b => b.id === hovered) : null
@@ -108,7 +106,7 @@ export default function FleetBoardClient({ buses, userRole }: { buses: BusRecord
                 style={{ position:'absolute', right:0, top:'calc(100% + 4px)', background:'#fff', border:'1px solid #e2e8f0', borderRadius:10, boxShadow:'0 8px 24px rgba(0,0,0,0.10)', zIndex:50, minWidth:160, overflow:'hidden' }}
                 onMouseLeave={() => setExportMenu(false)}
               >
-                {(['All','IS','OOS','UR','PP','RS'] as const).map((key, i) => {
+                {(['All','IS','OOS','UR','PP'] as const).map((key, i) => {
                   const busList = key === 'All' ? filtered : filtered.filter(b => b.bus_status === key)
                   const label   = key === 'All' ? 'All Buses' : STATUS_CONFIG[key].label
                   return (
@@ -140,7 +138,7 @@ export default function FleetBoardClient({ buses, userRole }: { buses: BusRecord
           ) : filtered.map(bus => {
             const cfg = STATUS_CONFIG[bus.bus_status as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG.OOS
             const isHov = hovered === bus.id
-            const hoverBg: Record<string,string> = { IS:'#15803d', OOS:'#b91c1c', UR:'#c2410c', PP:'#a16207', RS:'#0e7490' }
+            const hoverBg: Record<string,string> = { IS:'#15803d', OOS:'#b91c1c', UR:'#c2410c', PP:'#a16207' }
             return (
               <button
                 key={bus.id}
@@ -162,7 +160,6 @@ export default function FleetBoardClient({ buses, userRole }: { buses: BusRecord
                 <span style={{ fontSize:13, fontWeight:700, letterSpacing:'0.01em', lineHeight:1.2 }}>{bus.bus_id}</span>
                 {bus.bus_status === 'PP' && <span style={{ fontSize:10, fontWeight:500, opacity:0.85 }}>PARTS</span>}
                 {bus.bus_status === 'UR' && <span style={{ fontSize:10, fontWeight:500, opacity:0.85 }}>REPAIR</span>}
-                {bus.bus_status === 'RS' && <span style={{ fontSize:10, fontWeight:500, opacity:0.85 }}>RETURNED</span>}
               </button>
             )
           })}

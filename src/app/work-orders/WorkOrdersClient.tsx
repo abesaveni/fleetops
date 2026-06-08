@@ -123,16 +123,20 @@ ${wo.maintenance_comments ? `<div class="sec"><div class="sec-title">Maintenance
     setTimeout(() => { w.print(); w.close() }, 600)
   }
 
-  function doDownload() {
-    const blob = new Blob([buildDocHTML()], { type: 'text/html;charset=utf-8' })
-    const url  = URL.createObjectURL(blob)
-    const a    = document.createElement('a')
-    a.href     = url
-    a.download = `WorkOrder_${woNum}.html`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
+  async function doDownload() {
+    try {
+      const res  = await fetch('/api/work-order-pdf', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ wo }) })
+      if (!res.ok) throw new Error('PDF generation failed')
+      const blob = await res.blob()
+      const url  = URL.createObjectURL(blob)
+      const a    = document.createElement('a')
+      a.href     = url
+      a.download = `WorkOrder_${woNum}_${new Date().toISOString().slice(0, 10)}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    } catch { alert('Could not generate PDF. Please try again.') }
   }
 
   return (
